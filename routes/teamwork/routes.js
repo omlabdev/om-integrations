@@ -19,10 +19,15 @@ function taskCreated(req, res) {
 	const projectAsTag = project.trim().replace(/\s/g, '-').toLowerCase();
 	const link = site + '/index.cfm#tasks/' + id;
 
+	let taskTags = [projectAsTag, listAsTag, 'imported'];
+	if (tags && tags.length > 0) {
+		taskTags = taskTags.concat(tags);
+	}
+
 	const newTask = {
 		title, 
 		description,
-		tags : [projectAsTag, listAsTag, 'imported'].concat(tags),
+		tags : taskTags,
 		project : TempConfig.importTestProject, // TODO map from board? same name?
 		created_by : TempConfig.importTestUser, // need to map creator by trello username. we should do this on the services project
 		origin : 'teamwork',
