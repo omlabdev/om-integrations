@@ -7,6 +7,7 @@ const TempConfig = require('./../../conf/tmp');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
 router.post('/taskcreated', taskCreated);
+router.post('/webhook', webhook);
 
 module.exports = router;
 
@@ -43,5 +44,10 @@ function taskCreated(req, res) {
 		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
 		.catch(error => log('error', 'trello-cardcreated-response', error.message))
 
+	res.sendStatus(200);
+}
+
+function webhook(req, res) {
+	log('info', 'teamwork-webhook', JSON.stringify(req.body));
 	res.sendStatus(200);
 }
