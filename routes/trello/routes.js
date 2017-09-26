@@ -15,8 +15,8 @@ function cardCreated(req, res) {
 	log('info', 'trello-cardcreated', JSON.stringify(req.body));
 	
 	const { title, description, list, board, creator, cardUrl } = req.body;
-	const listAsTag = list.replace(/\s/g, '-').toLowerCase();
-	const boardAsTag = board.replace(/\s/g, '-').toLowerCase();
+	const listAsTag = list.trim().replace(/\s/g, '-').toLowerCase();
+	const boardAsTag = board.trim().replace(/\s/g, '-').toLowerCase();
 
 	const newTask = {
 		title, 
