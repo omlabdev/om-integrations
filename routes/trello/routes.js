@@ -21,7 +21,7 @@ function cardCreated(req, res) {
 	const newTask = {
 		title, 
 		description,
-		tags : ['trello', 'imported', listAsTag, boardAsTag],
+		tags : ['p/'+boardAsTag, 's/'+listAsTag, 'imported'],
 		project : TempConfig.importTestProject, // TODO map from board? same name?
 		created_by : TempConfig.importTestUser, // need to map creator by trello username. we should do this on the services project
 		origin : 'trello',
