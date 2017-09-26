@@ -14,7 +14,7 @@ module.exports = router;
 function cardCreated(req, res) {
 	log('info', 'trello-cardcreated', JSON.stringify(req.body));
 	
-	const { title, description, list, board, creator } = req.body;
+	const { title, description, list, board, creator, cardUrl } = req.body;
 	const listAsTag = list.replace(/\s/g, '-').toLowerCase();
 	const boardAsTag = board.replace(/\s/g, '-').toLowerCase();
 
@@ -24,7 +24,8 @@ function cardCreated(req, res) {
 		tags : ['trello', 'imported', listAsTag, boardAsTag],
 		project : TempConfig.importTestProject, // TODO map from board? same name?
 		created_by : TempConfig.importTestUser, // need to map creator by trello username. we should do this on the services project
-		origin : 'trello'
+		origin : 'trello',
+		external_url : cardUrl
 	}
 
 	superagent
