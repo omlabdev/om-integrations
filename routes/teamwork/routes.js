@@ -41,8 +41,8 @@ function taskCreated(req, res) {
 		.send(newTask)
 		.set('Authorization', Endpoints.authToken)
 		.then(response => response.body)
-		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
-		.catch(error => log('error', 'trello-cardcreated-response', error.message))
+		.then(body => log('info', 'teamwork-taskcreated-response', JSON.stringify(body)))
+		.catch(error => log('error', 'teamwork-taskcreated-response', error.message))
 
 	res.sendStatus(200);
 }
