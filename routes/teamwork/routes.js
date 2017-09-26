@@ -19,7 +19,7 @@ function taskCreated(req, res) {
 	const projectAsTag = project.trim().replace(/\s/g, '-').toLowerCase();
 	const link = site + '/index.cfm#tasks/' + id;
 
-	let taskTags = [projectAsTag, listAsTag, 'imported'];
+	let taskTags = ['p/'+projectAsTag, listAsTag, 'imported'];
 	if (tags && tags.length > 0) {
 		taskTags = taskTags.concat(tags);
 	}
