@@ -17,9 +17,12 @@ function emailReceived(req, res) {
 	log('info', 'email-newemail', JSON.stringify(req.body));
 
 	const { fromEmail, subject, body } = req.body;
+
+	// remove Fwd: and Re: from subject to clean it up
+	const title = subject.replace(/Fwd:/gi, '').replace(/Re:/gi, '').trim();
 	
 	const newTask = {
-		title : subject, 
+		title : title, 
 		description : body,
 		tags : ['imported'],
 		project : TempConfig.importTestProject, // TODO map from board? same name?
