@@ -50,24 +50,33 @@ function createTask(req, res) {
 		.set('Authorization', Endpoints.authToken)
 		.then(response => response.body)
 		.then(body => {
-			log('info', 'slack-createtask-response', JSON.stringify(body))
+			log('info', 'slack-createtask-response', JSON.stringify(body));
 			// send response to slack
-			superagent
-				.post(req.body.response_url)
-				.send({
-					"response_type" : "in_channel",
-					"text" : 'Done!'
-				})
-				.then(response => response.body)
-				.then(body => log('info', 'slack-createtask-slackresponse', JSON.stringify(body)))
-				.catch(error => log('error', 'slack-createtask-slackresponse', error.message))		
+			sendReponseToSlack(req.body.response_url, 'Done!');
 		})
-		.catch(error => log('error', 'slack-createtask-response', error.message))
-
+		.catch(error => {
+			log('error', 'slack-createtask-response', error.message);
+			sendReponseToSlack(req.body.response_url, error.message);
+		})
 
 	const formattedTags = tags.map(t => "`"+t+"`").join(" ");
+	let responseText = "Creating task *_" + newTask.title + "_*";
+	if (tags.length > 0) responseText += " with tags " + formattedTags;
+
 	res.json({
 		"response_type" : "in_channel",
-	    "text" 			: "Creating task *_" + newTask.title + "_* with tags " + formattedTags + ' for you...'
+	    "text" 			: responseText
 	});
+}
+
+function sendReponseToSlack(url, text) {
+	superagent
+		.post(url)
+		.send({
+			"response_type" : "in_channel",
+			"text" : text
+		})
+		.then(response => response.body)
+		.then(body => log('info', 'slack-slackresponse', JSON.stringify(body)))
+		.catch(error => log('error', 'slack-slackresponse', error.message))
 }
