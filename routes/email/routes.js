@@ -16,7 +16,7 @@ module.exports = router;
 function emailReceived(req, res) {
 	log('info', 'email-newemail', JSON.stringify(req.body));
 
-	const { fromEmail, subject, body } = JSON.parse(req.body.data);
+	const { fromEmail, subject, body } = req.body;
 	
 	const newTask = {
 		title : subject, 
