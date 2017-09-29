@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const superagent = require('superagent');
-const log = require('./../../utils/logger');
+const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
 const TempConfig = require('./../../conf/tmp');
 

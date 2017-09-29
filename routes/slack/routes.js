@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const superagent = require('superagent');
-const log = require('./../../utils/logger');
+const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
 const TempConfig = require('./../../conf/tmp');
 
@@ -21,8 +21,7 @@ function validateToken(req, res, next) {
 }
 
 function createTask(req, res) {
-	// log('info', 'slack-createtask', JSON.stringify(req.body));
-	console.log(req.body);
+	log('info', 'slack-createtask', JSON.stringify(req.body));
 
 	// do slash comand
 	const { text, user_name } = req.body;
