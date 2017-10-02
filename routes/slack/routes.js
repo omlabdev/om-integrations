@@ -99,6 +99,10 @@ function getAuthLink(req, res) {
 				text : link
 			})
 		})
+		.catch(error => {
+			log('error', 'get-auth-token-response', error.message);
+			sendResponseToSlack(req.body.response_url, error.message);
+		})
 }
 
 /**
