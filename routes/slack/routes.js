@@ -88,7 +88,7 @@ function unknownCommand(req, res) {
 
 
 function getAuthLink(req, res) {
-	const username = req.body.user.name;
+	const username = req.body.user_name;
 	superagent
 		.get(Endpoints.getAuthToken())
 		.set('Authorization', Endpoints.slackAuthToken(username))
