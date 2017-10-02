@@ -102,7 +102,9 @@ function getAuthLink(req, res) {
 		.catch(error => {
 			log('error', 'get-auth-token-response', error.message);
 			sendResponseToSlack(req.body.response_url, error.message);
-		})
+		});
+
+	res.json({ text : 'Please wait...' })
 }
 
 /**
@@ -178,7 +180,9 @@ function showAddEntryMenu(req, res) {
 			.catch(error => {
 				log('error', 'slack-objectivessmenu-response', error.message);
 				sendResponseToSlack(req.body.response_url, error.message);
-			})
+			});
+
+		res.json({ text : 'Please wait...' });
 	}
 	else {
 		renderAddEntryMenuWithOptions(data.options, data.selection, res);
