@@ -68,6 +68,8 @@ function resolveSlashCommand(req, res, next) {
 			return createTask(req, res, next);
 		case 'time': // adds a work entry
 			return initAddEntryMenu(req, res);
+		case 'auth': // get auth link
+			return getAuthLink(req, res);
 		default: // unknown command
 			return unknownCommand(req, res);
 	}
@@ -82,6 +84,21 @@ function unknownCommand(req, res) {
 	res.json({
 		text : "Unknown command"
 	})
+}
+
+
+function getAuthLink(req, res) {
+	const username = req.body.user.name;
+	superagent
+		.get(Endpoints.getAuthToken())
+		.set('Authorization', Endpoints.slackAuthToken(username))
+		.then(response => response.body)
+		.then(body => {
+			const link = body.link;
+			res.json({
+				text : link
+			})
+		})
 }
 
 /**

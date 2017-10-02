@@ -14,6 +14,7 @@ if (process.env.NODE_ENV === 'production') {
 
 
 module.exports = {
+	getAuthToken	: () => `${BASE_URL}/api/${API_VERSION}/users/auth-link`,
 	addTask 		: () => `${BASE_URL}/api/${API_VERSION}/tasks/add`,
 	getProjects 	: () => `${BASE_URL}/api/${API_VERSION}/projects`,
 	getObjectives 	: () => `${BASE_URL}/api/${API_VERSION}/objectives/${getYear()}/${getMonth()}/${getDay()}/all`,
