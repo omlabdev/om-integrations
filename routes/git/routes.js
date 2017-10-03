@@ -27,16 +27,13 @@ function onPushReceived(req, res) {
 	const gitAccount = req.body.actor.username;
 	const gitRepo = req.body.repository.name;
 
-	console.log("--- account: " + gitAccount);
-	console.log("--- repo: " + gitRepo);
-	
 	const commitMessages = [];
 	req.body.push.changes.forEach(change => {
 		change.commits.forEach(commit => {
 			commitMessages.push(commit.message); 
 		})
 	})
-	const commitSummary = commitMessages.map(m => '* ' + m).join('\n');
+	const commitSummary = commitMessages.map(m => '=== ' + m).join('\n');
 
 	getSlackUsernameForGitAccount(gitAccount, (error, slackAccount) => {
 		if (error) return console.error(error);
@@ -44,7 +41,7 @@ function onPushReceived(req, res) {
 		getUserIdFromUsername(slackAccount, (error, slackId) => {
 			if (error) return console.error(error);
 			// send message to user suggesting to add a new work entry
-			sendSlackMessageOfferingWorkEntry(slackId, commitSummary);
+			sendSlackMessageOfferingWorkEntry(slackId, gitRepo, commitSummary);
 		})
 	})
 }
@@ -53,12 +50,18 @@ function onPushReceived(req, res) {
  * Sends a private slack message to the user with the
  * given id offering to add a work entry in OM.
  * 
- * @param  {String} slackId The id of the user in Slack
+ * @param  {String} slackId 	The id of the user in Slack
+ * @param  {String} gitRepo 	The name of the repo
+ * @param  {String} summary 	The commit summary 
  */
-function sendSlackMessageOfferingWorkEntry(slackId, summary) {
+function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 	sendMessage(slackId, {
 		text : 'Looks like you just pushed some new code!',
 		attachments : JSON.stringify([
+			{
+				text : 'Repository: *' + gitRepo + '*',
+				color : getRandomColor()
+			},
 			{
 				text : summary,
 				color : getRandomColor()
