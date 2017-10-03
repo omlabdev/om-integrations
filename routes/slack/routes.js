@@ -188,6 +188,7 @@ function initAddEntryMenu(req, res) {
 function showAddEntryMenu(req, res) {
 	const payload = req.body.payload || req.body;
 	const username = payload.user ? payload.user.name : payload.user_name;
+	const response_url = payload.response_url;
 	const data = usersToSlashCommand[username]['entry'];
 
 	if (data.options.objective === null) {
@@ -195,14 +196,14 @@ function showAddEntryMenu(req, res) {
 		return fetchObjectivesForUsername(username, (error, objectives) => {
 			if (error) {
 				log('error', 'slack-objectives-menu-response', error.message);
-				return sendResponseToSlack(payload.response_url, { text: error.message });
+				return sendResponseToSlack(response_url, { text: error.message });
 			}
 			data.options.objective = objectives;
 			return showAddEntryMenu(req, res); // show again
 		})
 	}
 	else {
-		renderAddEntryMenuWithOptions(data.options, data.selection, payload.response_url);
+		renderAddEntryMenuWithOptions(data.options, data.selection, response_url);
 	}
 }
 
@@ -287,6 +288,10 @@ function fetchObjectivesForUsername(username, cb) {
 function onAddEntryOptionChosen(req, res) {
 	const username = req.body.payload.user.name;
 	const data = usersToSlashCommand[username]['entry'];
+	const response_url = req.body.payload.response_url;
+
+	// respond fast in the meantime...
+	res.json({ text : 'Please wait...' });
 
 	// store original message to prevent future undos.
 	if (!data.original_message) 
@@ -308,12 +313,12 @@ function onAddEntryOptionChosen(req, res) {
 	doAddNewWorkEntry(data, username)
 		.then(() => {
 			// send response to slack
-			sendResponseToSlack(req.body.payload.response_url,
+			sendResponseToSlack(response_url,
 				getWorkEntryAddedSuccessMessage(data.selection, true));
 		})
 		.catch(error => {
 			log('error', 'add-work-entry-response', error.message);
-			sendResponseToSlack(req.body.payload.response_url, { text: error.message });
+			sendResponseToSlack(response_url, { text: error.message });
 		})
 }
 
@@ -397,6 +402,7 @@ function getFormattedTimeFromSeconds(seconds) {
 function undoLastWorkEntry(req, res) {
 	const username = req.body.payload.user.name;
 	const data = usersToSlashCommand[username]['entry'];
+	const response_url = req.body.payload.response_url;
 
 	if (req.body.payload.original_message.ts !== data.original_message.ts) {
 		return res.json(getWorkEntryAddedSuccessMessage(data.selection, [{
@@ -405,6 +411,9 @@ function undoLastWorkEntry(req, res) {
 		}]));
 	}
 
+	// responde immediately
+	res.json({ text: 'Please wait...' });
+
 	const objectiveId = data.selection.objective.value;
 	const workEntryId = data.response._id;
 	superagent
@@ -412,13 +421,13 @@ function undoLastWorkEntry(req, res) {
 		.set('Authorization', Endpoints.slackAuthToken(username))
 		.then(response => {
 			log('info', 'delete-work-entry-response', JSON.stringify(response.body, null, '\t'));
-			res.json({
+			sendResponseToSlack(response_url, {
 				text : ':heavy_check_mark::heavy_check_mark: Work entry deleted'
 			})
 		})
 		.catch(error => {
 			log('error', 'delete-work-entry-response', error.message);
-			sendResponseToSlack(req.body.payload.response_url, { text: error.message });
+			sendResponseToSlack(response_url, { text: error.message });
 		})
 }
 
