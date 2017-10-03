@@ -92,11 +92,11 @@ function getAuthLink(req, res) {
 		.then(response => response.body)
 		.then(body => {
 			const link = body.link;
-			sendResponseToSlack(req.body.response_url, link);
+			sendResponseToSlack(req.body.response_url, { text: link });
 		})
 		.catch(error => {
 			log('error', 'get-auth-token-response', error.message);
-			sendResponseToSlack(req.body.response_url, error.message);
+			sendResponseToSlack(req.body.response_url, { text: error.message });
 		});
 
 	res.json({ text : 'Please wait...' })
@@ -190,7 +190,7 @@ function showAddEntryMenu(req, res) {
 			})
 			.catch(error => {
 				log('error', 'slack-objectivessmenu-response', error.message);
-				sendResponseToSlack(req.body.response_url, error.message);
+				sendResponseToSlack(req.body.response_url, { text: error.message });
 			});
 	}
 	else {
@@ -233,7 +233,7 @@ function renderAddEntryMenuWithOptions(options, selection, respose_url) {
 		]
 	}];
 	// send response to slack
-	sendResponseToSlack(response_url, "Choose an objective and time", attachments);
+	sendResponseToSlack(response_url, { text: "Choose an objective and time", attachments });
 }
 
 /**
@@ -301,11 +301,12 @@ function onAddEntryOptionChosen(req, res) {
 	doAddNewWorkEntry(data, username)
 		.then(() => {
 			// send response to slack
-			res.json(getWorkEntryAddedSuccessMessage(data.selection, true));
+			sendResponseToSlack(req.body.payload.response_url,
+				getWorkEntryAddedSuccessMessage(data.selection, true));
 		})
 		.catch(error => {
 			log('error', 'add-work-entry-response', error.message);
-			sendResponseToSlack(req.body.payload.response_url, error.message);
+			sendResponseToSlack(req.body.payload.response_url, { text: error.message });
 		})
 }
 
@@ -410,7 +411,7 @@ function undoLastWorkEntry(req, res) {
 		})
 		.catch(error => {
 			log('error', 'delete-work-entry-response', error.message);
-			sendResponseToSlack(req.body.payload.response_url, error.message);
+			sendResponseToSlack(req.body.payload.response_url, { text: error.message });
 		})
 }
 
@@ -451,11 +452,11 @@ function createTask(req, res) {
 		.then(body => {
 			log('info', 'slack-createtask-response', JSON.stringify(body));
 			// send response to slack
-			sendResponseToSlack(req.body.response_url, 'Done!');
+			sendResponseToSlack(req.body.response_url, { text: 'Done!' });
 		})
 		.catch(error => {
 			log('error', 'slack-createtask-response', error.message);
-			sendResponseToSlack(req.body.response_url, error.message);
+			sendResponseToSlack(req.body.response_url, { text: error.message });
 		})
 
 	const formattedTags = tags.map(t => "`"+t+"`").join(" ");
@@ -474,14 +475,14 @@ function createTask(req, res) {
  * @param  {String} url  Response URL
  * @param  {String} text Response text
  */
-function sendResponseToSlack(url, text, attachments = []) {
+function sendResponseToSlack(url, body) {
+	const message = Object.assign({
+		"response_type" : "in_channel",
+	}, body);
+
 	superagent
 		.post(url)
-		.send({
-			"response_type" : "in_channel",
-			"text" : text,
-			attachments
-		})
+		.send(message)
 		.then(response => response.body)
 		.then(body => log('info', 'slack-slackresponse', JSON.stringify(body)))
 		.catch(error => {
