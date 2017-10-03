@@ -33,7 +33,7 @@ function onPushReceived(req, res) {
 			commitMessages.push(commit.message); 
 		})
 	})
-	const commitSummary = commitMessages.map(m => '=== ' + m).join('\n');
+	const commitSummary = commitMessages.map(m => '  :the_horns: _' + m + '_').join('\n');
 
 	getSlackUsernameForGitAccount(gitAccount, (error, slackAccount) => {
 		if (error) return console.error(error);
@@ -59,12 +59,14 @@ function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 		text : 'Looks like you just pushed some new code!',
 		attachments : JSON.stringify([
 			{
-				text : 'Repository: *' + gitRepo + '*',
-				color : getRandomColor()
+				text : '_Repository_: *' + gitRepo + '*',
+				color : getRandomColor(),
+				mrkdwn: true
 			},
 			{
 				text : summary,
-				color : getRandomColor()
+				color : getRandomColor(),
+				mrkdwn: true
 			},
 			{
 				text : 'Add work entry?',
