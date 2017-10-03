@@ -219,7 +219,7 @@ function showAddEntryMenu(req, res) {
  * @param  {Array} selection 
  * @param  {Object} res       
  */
-function renderAddEntryMenuWithOptions(options, selection, respose_url) {
+function renderAddEntryMenuWithOptions(options, selection, response_url) {
 	const attachments = [{
 		text: 'Choose an objective and how much time to add',
 		color : getRandomColor(),
