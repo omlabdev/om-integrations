@@ -77,7 +77,7 @@ function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 						name  : 'add-work-entry',
 						type  : 'button',
 						text  : 'Add work entry',
-						value : 'add-work-entry'
+						value : 'add-work-entry' 
 					}
 				]
 			}
