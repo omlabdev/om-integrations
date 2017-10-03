@@ -33,7 +33,7 @@ function onPushReceived(req, res) {
 			commitMessages.push(commit.message); 
 		})
 	})
-	const commitSummary = commitMessages.map(m => '  :white_check_mark:  _' + m + '_').join('\n');
+	const commitSummary = commitMessages.map(m => '  :white_check_mark: ' + m).join('\n');
 
 	getSlackUsernameForGitAccount(gitAccount, (error, slackAccount) => {
 		if (error) return console.error(error);
@@ -67,24 +67,17 @@ function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 				title : 'Push summary',
 				text : summary,
 				color : getRandomColor(),
-				mrkdwn_in: ['text']
 			},
 			{
-				text : 'Add work entry?',
+				text : 'Wanna add a work entry for this commit?',
 				color : getRandomColor(),
 				callback_id : 'work_entry_cta',
 				actions : [
 					{
-						name  : 'yes',
+						name  : 'add-work-entry',
 						type  : 'button',
-						text  : 'Yeah!',
-						value : 'yes'
-					},
-					{
-						name  : 'no',
-						type  : 'button',
-						text  : 'Nope',
-						value : 'no'
+						text  : 'Add work entry',
+						value : 'add-work-entry'
 					}
 				]
 			}
