@@ -93,7 +93,7 @@ function sendSlackMessageOfferingWorkEntry(slackId, summary) {
  * @param  {String}   gitAccount 
  * @param  {Function} cb         (error, slack_account)
  */
-function getSlackUsernameForGitAccount(gitAccount, cb) {
+function getSlackUsernameForGitAccount(gitAccount, cb) { 
 	getUsers(gitAccount).end((error, response) => {
 		if (error) return cb(error);
 		// get user slack account from git account
