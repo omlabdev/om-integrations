@@ -6,5 +6,5 @@ module.exports = {
 
 	GIT_TOKEN 		: 'lkjLKNLKKNKABUHIUHS767823',
 
-	TRELLO_TOKEN 	: 'l897as98KJABHJkhajksh&asdkj-902817ty3hj',
+	TRELLO_TOKEN 	: 'l897as98KJABHJkhajkshasdkj-902817ty3hj'
 }
