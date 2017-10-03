@@ -492,7 +492,7 @@ function createTask(req, res) {
  * @param  {String} text Response text
  */
 function sendResponseToSlack(url, body) {
-	const message = Object.assign({
+	const message = Object.assign({}, {
 		"response_type" : "in_channel",
 	}, body);
 
