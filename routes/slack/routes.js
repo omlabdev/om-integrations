@@ -180,6 +180,8 @@ function showAddEntryMenu(req, res) {
 
 	log('info', 'slack-fetching-objectives', username);
 
+	res.json({ text : 'Please wait...' });
+
 	if (data.options.objective === null) {
 		// go fetch the objectives and then try again this function
 		fetchObjectivesForUsername(username)
@@ -196,8 +198,6 @@ function showAddEntryMenu(req, res) {
 		renderAddEntryMenuWithOptions(data.options, 
 			data.selection, req.body.response_url);
 	}
-
-	res.json({ text : 'Please wait...' });
 }
 
 /**
