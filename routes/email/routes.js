@@ -23,7 +23,12 @@ module.exports = router;
 
 
 function emailReceived(req, res) {
-	const { fromEmail, subject, body } = JSON.parse(req.body.data);
+	// get the actual email body information from Zapier here.
+	let email = req.body.data || req.body;
+	if (email !== null && typeof email !== 'object')
+		email = JSON.parse(email);
+
+	const { fromEmail, subject, body } = email;
 	log('info', 'email-newemail', 'Importing email with subject ' + subject);
 
 	// remove Fwd: and Re: from subject to clean it up
