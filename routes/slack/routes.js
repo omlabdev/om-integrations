@@ -59,9 +59,6 @@ function resolveSlashCommand(req, res, next) {
 		return resolveCallback(req, res);
 	}
 
-	const username = req.body.user_name;
-	if (!usersToSlashCommand[username]) usersToSlashCommand[username] = {};
-
 	const command = req.body.text.trim().split(" ")[0].toLowerCase();
 	switch (command) {
 		case 'task': // creates a new tasl
@@ -147,6 +144,9 @@ function resolveCallback(req, res) {
 function initAddEntryMenu(req, res) {
 	const payload = req.body.payload || req.body;
 	const username = payload.user ? payload.user.name : payload.user_name;
+
+	if (!usersToSlashCommand[username]) // init if not exists
+		usersToSlashCommand[username] = {};
 
 	usersToSlashCommand[username]['entry'] = {
 		selection : {

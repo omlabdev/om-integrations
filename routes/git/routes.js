@@ -11,6 +11,15 @@ router.post('/push', onPushReceived);
 
 module.exports = router;
 
+/**
+ * Called when the git hook detects a new push.
+ * 
+ * Sends a private message to the author's Slack
+ * account to offer to enter a new work entry in OM.
+ * 
+ * @param  {Object} req
+ * @param  {Object} res
+ */
 function onPushReceived(req, res) {
 	log('info', 'git-push', JSON.stringify(req.body, null, '\t'));
 	res.sendStatus(200); // respond to the caller immediately
@@ -27,6 +36,12 @@ function onPushReceived(req, res) {
 	})
 }
 
+/**
+ * Sends a private slack message to the user with the
+ * given id offering to add a work entry in OM.
+ * 
+ * @param  {String} slackId The id of the user in Slack
+ */
 function sendSlackMessageOfferingWorkEntry(slackId) {
 	sendMessage(slackId, {
 		text : 'Looks like you just pushed some new code! Wanna add a work entry?',
@@ -55,6 +70,13 @@ function sendSlackMessageOfferingWorkEntry(slackId) {
 	})
 }
 
+/**
+ * Returns the slack username for the user with the given
+ * git account in OM.
+ * 
+ * @param  {String}   gitAccount 
+ * @param  {Function} cb         (error, slack_account)
+ */
 function getSlackUsernameForGitAccount(gitAccount, cb) {
 	getUsers(gitAccount).end((error, response) => {
 		if (error) return cb(error);
@@ -68,6 +90,13 @@ function getSlackUsernameForGitAccount(gitAccount, cb) {
 	});
 }
 
+/**
+ * Returns the list of users in OM with all their fields.
+ * Uses the git account in OM to authenticate to OM.
+ * 
+ * @param  {String} username This users' git username in OM
+ * @return {Promise}          
+ */
 function getUsers(username) {
 	return superagent
 		.get(Endpoints.getUsers())
