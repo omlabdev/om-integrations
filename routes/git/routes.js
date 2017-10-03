@@ -59,7 +59,7 @@ function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 		text : 'Looks like you just pushed some new code!',
 		attachments : JSON.stringify([
 			{
-				title : 'Repository'
+				title : 'Repository',
 				text : gitRepo,
 				color : getRandomColor()
 			},
