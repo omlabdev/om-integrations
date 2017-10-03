@@ -21,10 +21,12 @@ module.exports = {
 	addWorkEntry	: (objectiveId) => `${BASE_URL}/api/${API_VERSION}/objectives/${objectiveId}/work-entries/add`,
 	deleteWorkEntry : (objectiveId, workEntryId) => `${BASE_URL}/api/${API_VERSION}/objectives/${objectiveId}/work-entries/${workEntryId}`,
 	getUsers 		: () => `${BASE_URL}/api/${API_VERSION}/users`,
+	getIntegrations	: () => `${BASE_URL}/api/${API_VERSION}/admin/integrations`,
 
 	authToken 		: () => 'Basic: bmljbw==:bmljbw==',
 	slackAuthToken  : (username) => `Slack: ${username}:${tokens.SLACK_TOKEN}`,
 	gitAuthToken  	: (username) => `Git: ${username}:${tokens.GIT_TOKEN}`,
+	trelloAuthToken : (username) => `Trello: ${username}:${tokens.TRELLO_TOKEN}`,
 
 	slackWebhook	: () => 'https://hooks.slack.com/services/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',
 	slackChatApi	: () => `https://slack.com/api/chat.postMessage?token=${tokens.SLACK_APP}`,

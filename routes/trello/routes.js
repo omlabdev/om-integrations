@@ -6,38 +6,63 @@ const Endpoints = require('./../../conf/services-endpoints');
 const TempConfig = require('./../../conf/tmp');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
-router.post('/cardcreated', cardCreated);
+router.post('/cardcreated/:integrationId', cardCreated);
 
 module.exports = router;
 
 
 function cardCreated(req, res) {
 	log('info', 'trello-cardcreated', JSON.stringify(req.body));
-	
+
+	const integrationId = req.params.integrationId;
 	const { title, description, list, board, creator, cardUrl } = req.body;
 	const listAsTag = list.trim().replace(/\s/g, '-').toLowerCase();
 	const boardAsTag = board.trim().replace(/\s/g, '-').toLowerCase();
 
-	const newTask = {
-		title, 
-		tags : ['p/'+boardAsTag, 's/'+listAsTag, 'imported'],
-		project : TempConfig.importTestProject, // TODO map from board? same name?
-		created_by : TempConfig.importTestUser, // need to map creator by trello username. we should do this on the services project
-		origin : 'trello',
-		external_url : cardUrl
-	}
+	console.log('----> creator is: ' + creator);
 
-	if (description && description.trim() !== '') {
-		newTask.description = description;
-	}
+	// respond immediately and continue
+	res.sendStatus(200);
 
+	getIntegrationWithId(integrationId, (error, integration) => {
+		if (error) return console.error(error);
+
+		const newTask = {
+			title, 
+			tags : integration.auto_tags, // todo templating to include list
+			project : integration.mappings.project,
+			origin : 'trello',
+			external_url : cardUrl
+		}
+
+		if (description && description.trim() !== '') {
+			newTask.description = description;
+		}
+
+		sendNewTask(newTask, creator);
+	})
+}
+
+function sendNewTask(task, username) {
 	superagent
 		.post(Endpoints.addTask())
 		.send(newTask)
-		.set('Authorization', Endpoints.authToken())
+		.set('Authorization', Endpoints.trelloAuthToken(username))
 		.then(response => response.body)
 		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
-		.catch(error => log('error', 'trello-cardcreated-response', error.message))
+		.catch(error => log('error', 'trello-cardcreated-response', error.message));
+}
 
-	res.sendStatus(200);
+function getIntegrationWithId(integrationId, username, cb) {
+	superagent
+		.get(Endpoints.getIntegrations())
+		.set('Authorization', Endpoints.trelloAuthToken(username))
+		.end((error, response) => {
+			if (error) return cb(error);
+			const integrations = response.body.integrations;
+			let integration = integrations.filter(i => i._id === integrationId);
+			if (integration.length > 0) 
+				return cb(null, integration[0]);
+			return cb(new Error('Integration has no project'));
+		})
 }
