@@ -24,11 +24,11 @@ function onPushReceived(req, res) {
 	log('info', 'git-push', JSON.stringify(req.body, null, '\t'));
 	res.sendStatus(200); // respond to the caller immediately
 
-	const gitAccount = req.body.data.actor.username;
-	const gitRepo = req.body.data.repository.name;
+	const gitAccount = req.body.actor.username;
+	const gitRepo = req.body.repository.name;
 	
 	const commitMessages = [];
-	req.body.data.push.changes.forEach(change => {
+	req.body.push.changes.forEach(change => {
 		change.commits.forEach(commit => {
 			commitMessages.push(commit.message);
 		})
