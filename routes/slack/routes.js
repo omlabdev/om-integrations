@@ -5,7 +5,7 @@ const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
 const TempConfig = require('./../../conf/tmp');
 const getRandomColor = require('./../../utils/random_color');
-const slackConf = require('../../conf/slack');
+const tokens = require('../../conf/tokens');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
 router.post('/slash', flagInteractiveMessage, validateToken, resolveSlashCommand);
@@ -40,7 +40,7 @@ function flagInteractiveMessage(req, res, next) {
  * Validates that this POST is coming from Slack
  */
 function validateToken(req, res, next) {
-	if (req.body.token !== slackConf.APP_TOKEN) return res.sendStatus(403);
+	if (req.body.token !== tokens.SLACK_TOKEN) return res.sendStatus(403);
 	next();
 }
 
@@ -119,10 +119,19 @@ function resolveCallback(req, res) {
 	const cb_id = req.body.payload.callback_id;
 
 	switch (cb_id) {
+		// one of the option from the new entry menu has
+		// been selected
 		case 'work_entry_option_chosen':
 			return onAddEntryOptionChosen(req, res);
+
+		// the UNDO button of a work entry has been tapped
 		case 'undo_last_work_entry':
 			return undoLastWorkEntry(req, res);
+
+		// one 'Add new work entry' CTA has been tapped
+		case 'work_entry_cta':
+			return initAddEntryMenu(req, res);
+
 		default:
 			return unknownCommand(req, res);
 	}
@@ -136,7 +145,8 @@ function resolveCallback(req, res) {
  * @param  {Object} res 
  */
 function initAddEntryMenu(req, res) {
-	const username = req.body.user_name;
+	const payload = req.body.payload || req.body;
+	const username = payload.user ? payload.user.name : payload.user_name;
 
 	usersToSlashCommand[username]['entry'] = {
 		selection : {
@@ -422,7 +432,7 @@ function createTask(req, res) {
 	const tagsBlockRegex = /\[(.*)\]$/gi; 	// .... [tag1, tag2]
 	const matches = tagsBlockRegex.exec(text);
 	let tags = [];
-	let title = text.trim();
+	let title = text.replace(/^task\s/i, '').trim();
 
 	if (matches && matches.length > 0) {
 		title = title.replace(matches[0], '').trim();
