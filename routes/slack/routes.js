@@ -178,8 +178,7 @@ function showAddEntryMenu(req, res) {
 	const username = payload.user ? payload.user.name : payload.user_name;
 	const data = usersToSlashCommand[username]['entry'];
 
-	log('info', 'slack-fetching-objectives', username);
-
+	// respond fast in the meantime...
 	res.json({ text : 'Please wait...' });
 
 	if (data.options.objective === null) {
