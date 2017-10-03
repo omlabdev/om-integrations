@@ -33,7 +33,7 @@ function onPushReceived(req, res) {
 			commitMessages.push(commit.message); 
 		})
 	})
-	const commitSummary = commitMessages.map(m => '- ' + m).join('\n');
+	const commitSummary = commitMessages.map(m => '- ' + m.replace(/\n+$/, '')).join('\n');
 
 	getSlackUsernameForGitAccount(gitAccount, (error, slackAccount) => {
 		if (error) return console.error(error);
