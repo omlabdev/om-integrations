@@ -30,7 +30,7 @@ function onPushReceived(req, res) {
 	const commitMessages = [];
 	req.body.push.changes.forEach(change => {
 		change.commits.forEach(commit => {
-			commitMessages.push(commit.message);
+			commitMessages.push(commit.message); 
 		})
 	})
 	const commitSummary = commitMessages.map(m => '* ' + m).join('\n');
