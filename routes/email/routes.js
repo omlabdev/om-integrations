@@ -49,9 +49,9 @@ function emailReceived(req, res) {
 	}
 
 	superagent
-		.post(Endpoints.addTask)
+		.post(Endpoints.addTask())
 		.send(newTask)
-		.set('Authorization', Endpoints.authToken)
+		.set('Authorization', Endpoints.authToken())
 		.then(response => response.body)
 		.then(body => log('info', 'email-newemail-response', JSON.stringify(body)))
 		.catch(error => log('error', 'email-newemail-response', error.message))

@@ -37,9 +37,9 @@ function taskCreated(req, res) {
 	}
 
 	superagent
-		.post(Endpoints.addTask)
+		.post(Endpoints.addTask())
 		.send(newTask)
-		.set('Authorization', Endpoints.authToken)
+		.set('Authorization', Endpoints.authToken())
 		.then(response => response.body)
 		.then(body => log('info', 'teamwork-taskcreated-response', JSON.stringify(body)))
 		.catch(error => log('error', 'teamwork-taskcreated-response', error.message))
