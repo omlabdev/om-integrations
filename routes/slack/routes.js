@@ -92,20 +92,22 @@ function unknownCommand(req, res) {
  */
 function getAuthLink(req, res) {
 	const username = req.body.user_name;
+	const response_url = req.body.response_url;
 	superagent
 		.get(Endpoints.getAuthToken())
 		.set('Authorization', Endpoints.slackAuthToken(username))
 		.then(response => response.body)
 		.then(body => {
 			const link = body.link;
-			sendResponseToSlack(req.body.response_url, { text: link });
+			sendResponseToSlack(response_url, { text: link });
 		})
 		.catch(error => {
 			log('error', 'get-auth-token-response', error.message);
-			sendResponseToSlack(req.body.response_url, { text: error.message });
+			sendResponseToSlack(response_url, { text: error.message });
 		});
 
-	res.json({ text : 'Please wait...' })
+	// respond immediately
+	res.json({ text : 'Please wait...', "response_type" : "in_channel" })
 }
 
 /**
@@ -156,7 +158,7 @@ function initAddEntryMenu(req, res) {
 		usersToSlashCommand[username] = {};
 
 	// respond fast in the meantime...
-	res.json({ text : 'Please wait...' });
+	res.json({ text : 'Please wait...', "response_type" : "in_channel" });
 
 	usersToSlashCommand[username]['entry'] = {
 		selection : {
@@ -291,7 +293,7 @@ function onAddEntryOptionChosen(req, res) {
 	const response_url = req.body.payload.response_url;
 
 	// respond fast in the meantime...
-	res.json({ text : 'Please wait...' });
+	res.json({ text : 'Please wait...', "response_type" : "in_channel" });
 
 	// store original message to prevent future undos.
 	if (!data.original_message) 
@@ -412,7 +414,7 @@ function undoLastWorkEntry(req, res) {
 	}
 
 	// responde immediately
-	res.json({ text: 'Please wait...' });
+	res.json({ text: 'Please wait...', "response_type" : "in_channel" });
 
 	const objectiveId = data.selection.objective.value;
 	const workEntryId = data.response._id;
