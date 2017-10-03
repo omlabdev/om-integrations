@@ -19,13 +19,13 @@ function cardCreated(req, res) {
 	const listAsTag = list.trim().replace(/\s/g, '-').toLowerCase();
 	const boardAsTag = board.trim().replace(/\s/g, '-').toLowerCase();
 
-	console.log('----> creator is: ' + creator);
-
-	// respond immediately and continue
-	res.sendStatus(200);
-
 	getIntegrationWithId(integrationId, (error, integration) => {
-		if (error) return console.error(error);
+		if (error) {
+			console.log('ERROR IN getIntegrationWithId');
+			return log('error', 'trello-get-integration-response', JSON.stringify(error));
+		}
+
+		console.log(integration);
 
 		const newTask = {
 			title, 
@@ -41,6 +41,9 @@ function cardCreated(req, res) {
 
 		sendNewTask(newTask, creator);
 	})
+
+	// respond immediately and continue
+	res.sendStatus(200);
 }
 
 function sendNewTask(task, username) {
@@ -61,8 +64,9 @@ function getIntegrationWithId(integrationId, username, cb) {
 			if (error) return cb(error);
 			const integrations = response.body.integrations;
 			let integration = integrations.filter(i => i._id === integrationId);
-			if (integration.length > 0) 
+			if (integration.length > 0) { 
 				return cb(null, integration[0]);
+			}
 			return cb(new Error('Integration has no project'));
 		})
 }
