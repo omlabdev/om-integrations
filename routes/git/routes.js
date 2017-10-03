@@ -64,7 +64,7 @@ function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 				color : getRandomColor()
 			},
 			{
-				title : 'Push summary'
+				title : 'Push summary',
 				text : summary,
 				color : getRandomColor(),
 				mrkdwn_in: ['text']
