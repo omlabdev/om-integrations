@@ -92,9 +92,7 @@ function getAuthLink(req, res) {
 		.then(response => response.body)
 		.then(body => {
 			const link = body.link;
-			res.json({
-				text : link
-			})
+			sendResponseToSlack(req.body.response_url, link);
 		})
 		.catch(error => {
 			log('error', 'get-auth-token-response', error.message);
@@ -197,7 +195,8 @@ function showAddEntryMenu(req, res) {
 		res.json({ text : 'Please wait...' });
 	}
 	else {
-		renderAddEntryMenuWithOptions(data.options, data.selection, res);
+		renderAddEntryMenuWithOptions(data.options, 
+			data.selection, req.body.response_url);
 	}
 }
 
@@ -214,7 +213,7 @@ function showAddEntryMenu(req, res) {
  * @param  {Array} selection 
  * @param  {Object} res       
  */
-function renderAddEntryMenuWithOptions(options, selection, res) {
+function renderAddEntryMenuWithOptions(options, selection, respose_url) {
 	const attachments = [{
 		text: 'Choose an objective and how much time to add',
 		color : getRandomColor(),
@@ -235,11 +234,7 @@ function renderAddEntryMenuWithOptions(options, selection, res) {
 		]
 	}];
 	// send response to slack
-	res.json({
-		response_type: 'in_channel',
-		text : "Choose an objective and time",
-		attachments : attachments
-	})
+	sendResponseToSlack(response_url, "Choose an objective and time", attachments);
 }
 
 /**
