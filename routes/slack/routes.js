@@ -180,6 +180,8 @@ function showAddEntryMenu(req, res) {
 	const username = payload.user ? payload.user.name : payload.user_name;
 	const data = usersToSlashCommand[username]['entry'];
 
+	log('info', 'slack-fetching-objectives', username);
+
 	if (data.options.objective === null) {
 		// go fetch the objectives and then try again this function
 		fetchObjectivesForUsername(username)
