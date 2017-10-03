@@ -191,13 +191,13 @@ function showAddEntryMenu(req, res) {
 				log('error', 'slack-objectivessmenu-response', error.message);
 				sendResponseToSlack(req.body.response_url, error.message);
 			});
-
-		res.json({ text : 'Please wait...' });
 	}
 	else {
 		renderAddEntryMenuWithOptions(data.options, 
 			data.selection, req.body.response_url);
 	}
+
+	res.json({ text : 'Please wait...' });
 }
 
 /**
