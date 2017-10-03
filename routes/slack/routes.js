@@ -133,6 +133,7 @@ function resolveCallback(req, res) {
 
 		// one 'Add new work entry' CTA has been tapped
 		case 'work_entry_cta':
+			console.log(JSON.stringify(req.body.payload));
 			return initAddEntryMenu(req, res);
 
 		default:
