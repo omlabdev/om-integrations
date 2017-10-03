@@ -26,6 +26,9 @@ function onPushReceived(req, res) {
 
 	const gitAccount = req.body.actor.username;
 	const gitRepo = req.body.repository.name;
+
+	console.log("--- account: " + gitAccount);
+	console.log("--- repo: " + gitRepo);
 	
 	const commitMessages = [];
 	req.body.push.changes.forEach(change => {
