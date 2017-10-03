@@ -24,14 +24,24 @@ function onPushReceived(req, res) {
 	log('info', 'git-push', JSON.stringify(req.body, null, '\t'));
 	res.sendStatus(200); // respond to the caller immediately
 
-	const gitAccount = req.body.username;
+	const gitAccount = req.body.data.actor.username;
+	const gitRepo = req.body.data.repository.name;
+	
+	const commitMessages = [];
+	req.body.data.push.changes.forEach(change => {
+		change.commits.forEach(commit => {
+			commitMessages.push(commit.message);
+		})
+	})
+	const commitSummary = commitMessages.map(m => '* ' + m).join('\n');
+
 	getSlackUsernameForGitAccount(gitAccount, (error, slackAccount) => {
 		if (error) return console.error(error);
 		// get slack id from slack username using Slack's API
 		getUserIdFromUsername(slackAccount, (error, slackId) => {
 			if (error) return console.error(error);
 			// send message to user suggesting to add a new work entry
-			sendSlackMessageOfferingWorkEntry(slackId);
+			sendSlackMessageOfferingWorkEntry(slackId, commitSummary);
 		})
 	})
 }
@@ -42,28 +52,34 @@ function onPushReceived(req, res) {
  * 
  * @param  {String} slackId The id of the user in Slack
  */
-function sendSlackMessageOfferingWorkEntry(slackId) {
+function sendSlackMessageOfferingWorkEntry(slackId, summary) {
 	sendMessage(slackId, {
-		text : 'Looks like you just pushed some new code! Wanna add a work entry?',
-		attachments : JSON.stringify([{
-			text : 'Add work entry?',
-			color : getRandomColor(),
-			callback_id : 'work_entry_cta',
-			actions : [
-				{
-					name  : 'yes',
-					type  : 'button',
-					text  : 'Yeah!',
-					value : 'yes'
-				},
-				{
-					name  : 'no',
-					type  : 'button',
-					text  : 'Nope',
-					value : 'no'
-				}
-			]
-		}])
+		text : 'Looks like you just pushed some new code!',
+		attachments : JSON.stringify([
+			{
+				text : summary,
+				color : getRandomColor()
+			},
+			{
+				text : 'Add work entry?',
+				color : getRandomColor(),
+				callback_id : 'work_entry_cta',
+				actions : [
+					{
+						name  : 'yes',
+						type  : 'button',
+						text  : 'Yeah!',
+						value : 'yes'
+					},
+					{
+						name  : 'no',
+						type  : 'button',
+						text  : 'Nope',
+						value : 'no'
+					}
+				]
+			}
+		])
 	}, (error, response) => {
 		if (error) return console.error(error);
 		if (!response.body.ok) return console.error(response.body.error);
