@@ -83,7 +83,13 @@ function unknownCommand(req, res) {
 	})
 }
 
-
+/**
+ * Responds the command with the auth link the user
+ * should use to access OM.
+ * 
+ * @param  {Object} req
+ * @param  {Object} res
+ */
 function getAuthLink(req, res) {
 	const username = req.body.user_name;
 	superagent
@@ -135,6 +141,9 @@ function resolveCallback(req, res) {
 /**
  * Initializes a work entry workflow. The intermediate data is 
  * persisted on a simple in-memory object indexed by username.
+ *
+ * Sends a Please wait message while all the background logic
+ * runs.
  * 
  * @param  {Object} req 
  * @param  {Object} res 
@@ -145,6 +154,9 @@ function initAddEntryMenu(req, res) {
 
 	if (!usersToSlashCommand[username]) // init if not exists
 		usersToSlashCommand[username] = {};
+
+	// respond fast in the meantime...
+	res.json({ text : 'Please wait...' });
 
 	usersToSlashCommand[username]['entry'] = {
 		selection : {
@@ -178,24 +190,19 @@ function showAddEntryMenu(req, res) {
 	const username = payload.user ? payload.user.name : payload.user_name;
 	const data = usersToSlashCommand[username]['entry'];
 
-	// respond fast in the meantime...
-	res.json({ text : 'Please wait...' });
-
 	if (data.options.objective === null) {
 		// go fetch the objectives and then try again this function
-		fetchObjectivesForUsername(username)
-			.then(objectives => {
-				data.options.objective = objectives;
-				showAddEntryMenu(req, res); // show again)
-			})
-			.catch(error => {
-				log('error', 'slack-objectivessmenu-response', error.message);
-				sendResponseToSlack(req.body.response_url, { text: error.message });
-			});
+		return fetchObjectivesForUsername(username, (error, objectives) => {
+			if (error) {
+				log('error', 'slack-objectives-menu-response', error.message);
+				return sendResponseToSlack(payload.response_url, { text: error.message });
+			}
+			data.options.objective = objectives;
+			return showAddEntryMenu(req, res); // show again
+		})
 	}
 	else {
-		renderAddEntryMenuWithOptions(data.options, 
-			data.selection, req.body.response_url);
+		renderAddEntryMenuWithOptions(data.options, data.selection, payload.response_url);
 	}
 }
 
@@ -244,13 +251,13 @@ function renderAddEntryMenuWithOptions(options, selection, respose_url) {
  * @param  {String} username
  * @return {Promise}         
  */
-function fetchObjectivesForUsername(username) {
+function fetchObjectivesForUsername(username, cb) {
 	return superagent
 		.get(Endpoints.getObjectives())
 		.set('Authorization', Endpoints.slackAuthToken(username))
-		.then(response => response.body)
-		.then(body => body.objectives)
-		.then(objectivesByLevel => {
+		.end((error, response) => {
+			if (error) return cb(error);
+			const objectivesByLevel = response.body.objectives;
 			// flatten
 			const objectives = [];
 			['day','month','year'].forEach(level => {
@@ -261,7 +268,7 @@ function fetchObjectivesForUsername(username) {
 					});
 				})
 			})
-			return objectives;
+			return cb(null, objectives);
 		})
 }
 
