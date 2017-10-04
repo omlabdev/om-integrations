@@ -457,14 +457,16 @@ function initCreateTask(req, res) {
 		tags = matches[1].split(',').map(t => t.trim());
 	}
 
+	const newTask = {
+		title, 
+		tags,
+		origin : 'slack'
+	};
+
 	// add task infomation to on-memory temp storage
 	if (!usersToSlashCommand[user_name]) usersToSlashCommand[user_name] = {};
 	usersToSlashCommand[user_name]['create-task'] = {
-		task : {
-			title, 
-			tags : tags,
-			origin : 'slack'
-		}
+		task : newTask
 	}
 
 	// respond immediately
