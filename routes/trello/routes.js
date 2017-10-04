@@ -59,9 +59,11 @@ function sendNewTask(task, username) {
 
 function getIntegrationWithId(integrationId, username, cb) {
 	console.log("GETTING INTEGRATIONS");
+	const auth = Endpoints.trelloAuthToken(username);
+	console.log("AUTH: ", auth);
 	superagent
 		.get(Endpoints.getIntegrations())
-		.set('Authorization', Endpoints.trelloAuthToken(username))
+		.set('Authorization', auth)
 		.end((error, response) => {
 			if (error) return cb(error);
 			const integrations = response.body.integrations;
