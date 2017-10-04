@@ -50,8 +50,8 @@ function sendNewTask(task, username) {
 	console.log("SENDING NEW TASK");
 	superagent
 		.post(Endpoints.addTask())
-		.send(newTask)
 		.set('Authorization', Endpoints.trelloAuthToken(username))
+		.send(task)
 		.then(response => response.body)
 		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
 		.catch(error => log('error', 'trello-cardcreated-response', error.message));
