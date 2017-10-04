@@ -458,6 +458,7 @@ function initCreateTask(req, res) {
 	}
 
 	// add task infomation to on-memory temp storage
+	if (!usersToSlashCommand[user_name]) usersToSlashCommand[user_name] = {};
 	usersToSlashCommand[user_name]['create-task'] = {
 		task : {
 			title, 
