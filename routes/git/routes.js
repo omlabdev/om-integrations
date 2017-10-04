@@ -21,7 +21,7 @@ module.exports = router;
  * @param  {Object} res
  */
 function onPushReceived(req, res) {
-	log('info', 'git-push', JSON.stringify(req.body, null, '\t'));
+	log('info', 'git-push', JSON.stringify(req.body));
 	res.sendStatus(200); // respond to the caller immediately
 
 	const gitAccount = req.body.actor.username;
