@@ -3,7 +3,7 @@ const router = express.Router();
 const superagent = require('superagent');
 const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
-const TempConfig = require('./../../conf/tmp');
+const getIntegrationWithId = require('../../utils/get_integration');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
 router.post('/cardcreated/:integrationId', cardCreated);
@@ -19,13 +19,11 @@ function cardCreated(req, res) {
 	const listAsTag = list.trim().replace(/\s/g, '-').toLowerCase();
 	const boardAsTag = board.trim().replace(/\s/g, '-').toLowerCase();
 
-	getIntegrationWithId(integrationId, creator, (error, integration) => {
+	const auth = Endpoints.trelloAuthToken(creator);
+	getIntegrationWithId(integrationId, auth, (error, integration) => {
 		if (error) {
-			console.log('ERROR IN getIntegrationWithId');
 			return log('error', 'trello-get-integration-response', JSON.stringify(error));
 		}
-
-		console.log(integration);
 
 		const newTask = {
 			title, 
@@ -47,7 +45,6 @@ function cardCreated(req, res) {
 }
 
 function sendNewTask(task, username) {
-	console.log("SENDING NEW TASK");
 	superagent
 		.post(Endpoints.addTask())
 		.set('Authorization', Endpoints.trelloAuthToken(username))
@@ -55,19 +52,4 @@ function sendNewTask(task, username) {
 		.then(response => response.body)
 		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
 		.catch(error => log('error', 'trello-cardcreated-response', error.message));
-}
-
-function getIntegrationWithId(integrationId, username, cb) {
-	superagent
-		.get(Endpoints.getIntegrations())
-		.set('Authorization', Endpoints.trelloAuthToken(username))
-		.end((error, response) => {
-			if (error) return cb(error);
-			const integrations = response.body.integrations;
-			let integration = integrations.filter(i => i._id === integrationId);
-			if (integration.length > 0) { 
-				return cb(null, integration[0]);
-			}
-			return cb(new Error('Integration has no project'));
-		})
 }

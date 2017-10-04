@@ -3,51 +3,64 @@ const router = express.Router();
 const superagent = require('superagent');
 const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
-const TempConfig = require('./../../conf/tmp');
+const getIntegrationWithId = require('../../utils/get_integration');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
-router.post('/taskcreated', taskCreated);
-router.post('/webhook', webhook);
+router.post('/webhook/:integrationId', webhook);
 
 module.exports = router;
 
 
-function taskCreated(req, res) {
-	log('info', 'teamwork-taskcreated', JSON.stringify(req.body));
+function webhook(req, res) {
+	log('info', 'teamwork-webhook', JSON.stringify(req.body));
+
+	const { id, name, priority, status, tags, projectId, description } = req.body.task;
+	const listName = req.body.taskList.name;
+
+	if (status !== "new") {
+		log('info', 'teamwork-webhook-status', 'Status is NOT new. Status = ' + status + '. FINISHING HERE');
+		return;
+	}
+
+	const integrationId = req.params.integrationId;
+	const auth = Endpoints.authToken();
+	getIntegrationWithId(integrationId, auth, (error, integration) => {
+		if (error) {
+			return log('error', 'teamwork-get-integration-response', JSON.stringify(error));
+		}
+
+		// get project _id
+		const mappingKey = projectId.toString();
+		const project = integration.mappings[mappingKey];
+		if (!project) {
+			return log('error', 'teamwork-integration-mapping-missing', 'Mapping for project ' + mappingKey + ' does not exist on integration ' + integration._id);
+		}
+
+		const site = `https://${integration.meta.account}.teamwork.com`;
+		const link = site + '/index.cfm#tasks/' + id;
+		const newTask = {
+			title : name, 
+			description : description ? description : '',
+			tags : tags.concat(integration.auto_tags || []),
+			project,
+			origin : 'teamwork',
+			external_url : link,
+			external_id : id
+		}
+
+		sendNewTask(newTask);
+	})
 	
-	const { project, list, title, description, tags, assignedTo, id, site } = req.body;
-	const listAsTag = list.trim().replace(/\s/g, '-').toLowerCase();
-	const projectAsTag = project.trim().replace(/\s/g, '-').toLowerCase();
-	const link = site + '/index.cfm#tasks/' + id;
-
-	let taskTags = ['p/'+projectAsTag, listAsTag, 'imported'];
-	if (tags && tags.length > 0) {
-		taskTags = taskTags.concat(tags);
-	}
-
-	const newTask = {
-		title, 
-		description,
-		tags : taskTags,
-		project : TempConfig.importTestProject, // TODO map from board? same name?
-		created_by : TempConfig.importTestUser, // need to map creator by trello username. we should do this on the services project
-		origin : 'teamwork',
-		external_url : link,
-		external_id : id
-	}
-
-	superagent
-		.post(Endpoints.addTask())
-		.send(newTask)
-		.set('Authorization', Endpoints.authToken())
-		.then(response => response.body)
-		.then(body => log('info', 'teamwork-taskcreated-response', JSON.stringify(body)))
-		.catch(error => log('error', 'teamwork-taskcreated-response', error.message))
-
+	// respond immediately
 	res.sendStatus(200);
 }
 
-function webhook(req, res) {
-	log('info', 'teamwork-webhook', JSON.stringify(req.body));
-	res.sendStatus(200);
+function sendNewTask(task) {
+	superagent
+		.post(Endpoints.addTask())
+		.set('Authorization', Endpoints.authToken())
+		.send(task)
+		.then(response => response.body)
+		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
+		.catch(error => log('error', 'trello-cardcreated-response', error.message));
 }
