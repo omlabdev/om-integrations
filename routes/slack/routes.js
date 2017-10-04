@@ -503,7 +503,7 @@ function showProjectSelection(response_url, responseText) {
 					actions: [{
 						name : 'project',
 						type : 'select',
-						options : projects.map(p => { text: p.name, value: p._id })
+						options : projects.map(p => { return { text: p.name, value: p._id } })
 					}]
 			    }]
 			})
