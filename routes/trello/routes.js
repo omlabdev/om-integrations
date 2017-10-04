@@ -19,7 +19,7 @@ function cardCreated(req, res) {
 	const listAsTag = list.trim().replace(/\s/g, '-').toLowerCase();
 	const boardAsTag = board.trim().replace(/\s/g, '-').toLowerCase();
 
-	getIntegrationWithId(integrationId, (error, integration) => {
+	getIntegrationWithId(integrationId, creator, (error, integration) => {
 		if (error) {
 			console.log('ERROR IN getIntegrationWithId');
 			return log('error', 'trello-get-integration-response', JSON.stringify(error));
@@ -58,12 +58,9 @@ function sendNewTask(task, username) {
 }
 
 function getIntegrationWithId(integrationId, username, cb) {
-	console.log("GETTING INTEGRATIONS");
-	const auth = Endpoints.trelloAuthToken(username);
-	console.log("AUTH: ", auth);
 	superagent
 		.get(Endpoints.getIntegrations())
-		.set('Authorization', auth)
+		.set('Authorization', Endpoints.trelloAuthToken(username))
 		.end((error, response) => {
 			if (error) return cb(error);
 			const integrations = response.body.integrations;
