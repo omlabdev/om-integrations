@@ -42,6 +42,7 @@ const usersToSlashCommand = {}
  * Validates that this POST is coming from Slack
  */
 function validateToken(req, res, next) {
+	console.log(req.body);
 	const token = req.body.payload ? req.body.payload.token : req.body.token;
 	if (token !== tokens.SLACK_TOKEN) return res.sendStatus(403);
 	next();
