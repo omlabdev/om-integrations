@@ -47,6 +47,7 @@ function cardCreated(req, res) {
 }
 
 function sendNewTask(task, username) {
+	console.log("SENDING NEW TASK");
 	superagent
 		.post(Endpoints.addTask())
 		.send(newTask)
@@ -57,6 +58,7 @@ function sendNewTask(task, username) {
 }
 
 function getIntegrationWithId(integrationId, username, cb) {
+	console.log("GETTING INTEGRATIONS");
 	superagent
 		.get(Endpoints.getIntegrations())
 		.set('Authorization', Endpoints.trelloAuthToken(username))
