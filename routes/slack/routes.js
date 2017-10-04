@@ -550,6 +550,9 @@ function createTaskOnProjectSelected(req, res) {
 
 		sendNewTask(newTask, username, payload.response_url);
 	});
+
+	// respond immediately
+	res.send({ "text": "Creating task..." });
 }
 
 /**
