@@ -537,7 +537,7 @@ function createTaskOnProjectSelected(req, res) {
 		const newTask = Object.assign(data.task, {
 			tags 	: data.task.tags.concat(integration.auto_tags || []),
 			project : selectedProject
-		}
+		});
 
 		sendNewTask(newTask, username, payload.response_url);
 	});
