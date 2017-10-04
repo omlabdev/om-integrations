@@ -3,8 +3,8 @@ const router = express.Router();
 const superagent = require('superagent');
 const { log, logRequest } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
-const TempConfig = require('./../../conf/tmp');
 const multer = require('multer');
+const getIntegrationWithId = require('../../utils/get_integration');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
