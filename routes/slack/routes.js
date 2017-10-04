@@ -552,7 +552,7 @@ function createTaskOnProjectSelected(req, res) {
 	});
 
 	// respond immediately
-	res.send({ "text": "Creating task..." });
+	res.json({ "text": "Creating task..." });
 }
 
 /**
