@@ -504,7 +504,7 @@ function showProjectSelection(response_url, responseText, username) {
 		.then(response => response.body.projects)
 		.then(projects => {
 			sendResponseToSlack(response_url, {
-				text : responseText,
+				text : '',
 				"attachments"   : [{
 			    	text: 'Choose a project',
 					color : getRandomColor(),
@@ -534,7 +534,7 @@ function createTaskOnProjectSelected(req, res) {
 	const payload = req.body;
 	const username = payload.user.name;
 	const selectedProject = payload.actions[0].selected_options[0].value;
-	const data = usersToSlashCommand[user_name]['create-task'];
+	const data = usersToSlashCommand[username]['create-task'];
 	
 	const integrationId = req.params.integrationId;
 	const auth = Endpoints.slackAuthToken(username);
