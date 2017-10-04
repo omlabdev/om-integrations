@@ -61,6 +61,6 @@ function sendNewTask(task) {
 		.set('Authorization', Endpoints.authToken())
 		.send(task)
 		.then(response => response.body)
-		.then(body => log('info', 'trello-cardcreated-response', JSON.stringify(body)))
-		.catch(error => log('error', 'trello-cardcreated-response', error.message));
+		.then(body => log('info', 'teamwork-webhook-response', JSON.stringify(body)))
+		.catch(error => log('error', 'teamwork-webhook-response', error.message));
 }

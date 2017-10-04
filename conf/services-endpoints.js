@@ -27,6 +27,7 @@ module.exports = {
 	slackAuthToken  : (username) => `Slack: ${username}:${tokens.SLACK_TOKEN}`,
 	gitAuthToken  	: (username) => `Git: ${username}:${tokens.GIT_TOKEN}`,
 	trelloAuthToken : (username) => `Trello: ${username}:${tokens.TRELLO_TOKEN}`,
+	emailAuthToken  : (email) => `Email: ${email}:${tokens.EMAIL_TOKEN}`,
 
 	slackWebhook	: () => 'https://hooks.slack.com/services/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',
 	slackChatApi	: () => `https://slack.com/api/chat.postMessage?token=${tokens.SLACK_APP}`,
