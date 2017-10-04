@@ -10,7 +10,7 @@ const getIntegrationWithId = require('../../utils/get_integration');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
 router.post('/slash/:integrationId', validateToken, resolveSlashCommand);
-router.post('/callback/:integrationId', validateToken, resolveCallback);
+router.post('/callback/:integrationId', parsePayload, validateToken, resolveCallback);
 
 module.exports = router;
 
@@ -38,12 +38,17 @@ const usersToSlashCommand = {}
 // 	next();
 // } 
 
+function parsePayload(req, res, next) {
+	req.body = JSON.parse(req.body.payload);
+	next();
+}
+
 /**
  * Validates that this POST is coming from Slack
  */
 function validateToken(req, res, next) {
 	console.log(req.body);
-	const token = req.body.payload ? req.body.payload.token : req.body.token;
+	const token = req.body.token;
 	if (token !== tokens.SLACK_TOKEN) return res.sendStatus(403);
 	next();
 }
@@ -119,7 +124,7 @@ function getAuthLink(req, res) {
  * @return {[type]}     
  */
 function resolveCallback(req, res) {
-	const cb_id = req.body.payload.callback_id;
+	const cb_id = req.body.callback_id;
 
 	switch (cb_id) {
 		// one of the option from the new entry menu has
@@ -155,7 +160,7 @@ function resolveCallback(req, res) {
  * @param  {Object} res 
  */
 function initAddEntryMenu(req, res) {
-	const payload = req.body.payload || req.body;
+	const payload = req.body;
 	const username = payload.user ? payload.user.name : payload.user_name;
 
 	if (!usersToSlashCommand[username]) // init if not exists
@@ -192,7 +197,7 @@ function initAddEntryMenu(req, res) {
  * @param  {Object} res 
  */
 function showAddEntryMenu(req, res) {
-	const payload = req.body.payload || req.body;
+	const payload = req.body;
 	const username = payload.user ? payload.user.name : payload.user_name;
 	const response_url = payload.response_url;
 	const data = usersToSlashCommand[username]['entry'];
@@ -292,19 +297,19 @@ function fetchObjectivesForUsername(username, cb) {
  * @param  {Object} res 
  */
 function onAddEntryOptionChosen(req, res) {
-	const username = req.body.payload.user.name;
+	const username = req.body.user.name;
 	const data = usersToSlashCommand[username]['entry'];
-	const response_url = req.body.payload.response_url;
+	const response_url = req.body.response_url;
 
 	// respond fast in the meantime...
 	res.json({ text : 'Please wait...', "response_type" : "in_channel" });
 
 	// store original message to prevent future undos.
 	if (!data.original_message) 
-		data.original_message = req.body.payload.original_message;
+		data.original_message = req.body.original_message;
 
-	const selectedField = req.body.payload.actions[0].name;
-	const value =  req.body.payload.actions[0].selected_options[0].value;
+	const selectedField = req.body.actions[0].name;
+	const value =  req.body.actions[0].selected_options[0].value;
 	const text = data.options[selectedField].filter(e => e.value === value)[0].text;
 
 	// store selected value in in-memory storage
@@ -406,11 +411,11 @@ function getFormattedTimeFromSeconds(seconds) {
  * @return {[type]}     
  */
 function undoLastWorkEntry(req, res) {
-	const username = req.body.payload.user.name;
+	const username = req.body.user.name;
 	const data = usersToSlashCommand[username]['entry'];
-	const response_url = req.body.payload.response_url;
+	const response_url = req.body.response_url;
 
-	if (req.body.payload.original_message.ts !== data.original_message.ts) {
+	if (req.body.original_message.ts !== data.original_message.ts) {
 		return res.json(getWorkEntryAddedSuccessMessage(data.selection, [{
 			title : 'Sorry, you can only undo your last entry',
 			color : getRandomColor()
@@ -526,7 +531,7 @@ function showProjectSelection(response_url, responseText, username) {
  * @param  {Object} res 
  */
 function createTaskOnProjectSelected(req, res) {
-	const { payload } = req.body;
+	const payload = req.body;
 	const username = payload.user.name;
 	const selectedProject = payload.actions[0].selected_options[0].value;
 	const data = usersToSlashCommand[user_name]['create-task'];
