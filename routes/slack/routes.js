@@ -6,41 +6,44 @@ const Endpoints = require('./../../conf/services-endpoints');
 const TempConfig = require('./../../conf/tmp');
 const getRandomColor = require('./../../utils/random_color');
 const tokens = require('../../conf/tokens');
+const getIntegrationWithId = require('../../utils/get_integration');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
-router.post('/slash', flagInteractiveMessage, validateToken, resolveSlashCommand);
+router.post('/slash/:integrationId', validateToken, resolveSlashCommand);
+router.post('/callback/:integrationId', validateToken, resolveCallback);
 
 module.exports = router;
 
 
 const usersToSlashCommand = {}
 
-/**
- * When an interactive message action is tapped/selected,
- * the body if the request contains all data inside an 
- * encoded field named *payload*.
- * Here we just flag the message as is_callback to know we
- * need to go fetch the data from the payload.
- * The payload is also decoded into a JS object.
- * 
- * @param  {Object}   req  
- * @param  {Object}   res  
- * @param  {Function} next 
- */
-function flagInteractiveMessage(req, res, next) {
-	if (req.body.payload) {
-		req.is_callback = true;
-		req.body.payload = JSON.parse(req.body.payload);
-		req.body.token = req.body.payload.token;
-	}
-	next();
-} 
+// *
+//  * When an interactive message action is tapped/selected,
+//  * the body if the request contains all data inside an 
+//  * encoded field named *payload*.
+//  * Here we just flag the message as is_callback to know we
+//  * need to go fetch the data from the payload.
+//  * The payload is also decoded into a JS object.
+//  * 
+//  * @param  {Object}   req  
+//  * @param  {Object}   res  
+//  * @param  {Function} next 
+ 
+// function flagInteractiveMessage(req, res, next) {
+// 	if (req.body.payload) {
+// 		req.is_callback = true;
+// 		req.body.payload = JSON.parse(req.body.payload);
+// 		req.body.token = req.body.payload.token;
+// 	}
+// 	next();
+// } 
 
 /**
  * Validates that this POST is coming from Slack
  */
 function validateToken(req, res, next) {
-	if (req.body.token !== tokens.SLACK_TOKEN) return res.sendStatus(403);
+	const token = req.body.payload ? req.body.payload.token : req.body.token;
+	if (token !== tokens.SLACK_TOKEN) return res.sendStatus(403);
 	next();
 }
 
@@ -55,14 +58,10 @@ function validateToken(req, res, next) {
 function resolveSlashCommand(req, res, next) {
 	log('info', 'slack-slash-command', JSON.stringify(req.body, null, '\t'));
 
-	if (req.is_callback === true) {
-		return resolveCallback(req, res);
-	}
-
 	const command = req.body.text.trim().split(" ")[0].toLowerCase();
 	switch (command) {
 		case 'task': // creates a new tasl
-			return createTask(req, res, next);
+			return initCreateTask(req, res, next);
 		case 'time': // adds a work entry
 			return initAddEntryMenu(req, res);
 		case 'auth': // get auth link
@@ -134,6 +133,10 @@ function resolveCallback(req, res) {
 		// one 'Add new work entry' CTA has been tapped
 		case 'work_entry_cta':
 			return initAddEntryMenu(req, res);
+
+		// project selected for new task
+		case 'add_task_project_selected':
+			return createTaskOnProjectSelected(req, res);
 
 		default:
 			return unknownCommand(req, res);
@@ -439,7 +442,7 @@ function undoLastWorkEntry(req, res) {
  * @param  {Object} req 
  * @param  {Object} res 
  */
-function createTask(req, res) {
+function initCreateTask(req, res) {
 	log('info', 'slack-createtask', JSON.stringify(req.body));
 
 	// do slash comand
@@ -454,37 +457,114 @@ function createTask(req, res) {
 		tags = matches[1].split(',').map(t => t.trim());
 	}
 
-	const newTask = {
-		title, 
-		tags : tags.concat(['imported']),
-		project : TempConfig.importTestProject, // TODO map from board? same name?
-		created_by : TempConfig.importTestUser, // need to map creator by slack username. we should do this on the services project
-		origin : 'slack'
+	// add task infomation to on-memory temp storage
+	usersToSlashCommand[user_name]['create-task'] = {
+		task : {
+			title, 
+			tags : tags,
+			origin : 'slack'
+		}
 	}
 
-	superagent
-		.post(Endpoints.addTask())
-		.send(newTask)
-		.set('Authorization', Endpoints.authToken())
-		.then(response => response.body)
-		.then(body => {
-			log('info', 'slack-createtask-response', JSON.stringify(body));
-			// send response to slack
-			sendResponseToSlack(req.body.response_url, { text: 'Done!' });
-		})
-		.catch(error => {
-			log('error', 'slack-createtask-response', error.message);
-			sendResponseToSlack(req.body.response_url, { text: error.message });
-		})
-
+	// respond immediately
+	// create a base response text
 	const formattedTags = tags.map(t => "`"+t+"`").join(" ");
 	let responseText = "Creating task *_" + newTask.title + "_*";
 	if (tags.length > 0) responseText += " with tags " + formattedTags;
-
 	res.json({
 		"response_type" : "in_channel",
 	    "text" 			: responseText
 	});
+
+	// fetch projects and show combo to select one
+	showProjectSelection(req.body.response_url, responseText);
+}
+
+/**
+ * Fetches the available list of projects from ON and
+ * sends back to slack the message and a combo to select
+ * a project.
+ * 
+ * @param  {String} response_url 
+ * @param  {String} responseText Main message
+ */
+function showProjectSelection(response_url, responseText) {
+	superagent
+		.get(Endpoints.getProjects())
+		.set('Authorization', Endpoints.slackAuthToken(username))
+		.then(response => response.body.projects)
+		.then(projects => {
+			sendResponseToSlack(response_url, {
+				text : responseText,
+				"attachments"   : [{
+			    	text: 'Choose a project',
+					color : getRandomColor(),
+					callback_id: 'add_task_project_selected',
+					actions: [{
+						name : 'project',
+						type : 'select',
+						options : projects.map(p => { text: p.name, value: p._id })
+					}]
+			    }]
+			})
+		})
+		.catch(error => {
+			log('error', 'slack-get-projects-response', error.message);
+			sendResponseToSlack(response_url, { text: error.message });
+		})
+}
+
+/**
+ * Callback to create a new task after a project has been 
+ * selected.
+ * 
+ * @param  {Object} req 
+ * @param  {Object} res 
+ */
+function createTaskOnProjectSelected(req, res) {
+	const { payload } = req.body;
+	const username = payload.user.name;
+	const selectedProject = payload.actions[0].selected_options[0].value;
+	const data = usersToSlashCommand[user_name]['create-task'];
+	
+	const integrationId = req.params.integrationId;
+	const auth = Endpoints.slackAuthToken(username);
+	getIntegrationWithId(integrationId, auth, (error, integration) => {
+		if (error) {
+			return log('error', 'slack-get-integration-response', JSON.stringify(error));
+		}
+
+		const newTask = Object.assign(data.task, {
+			tags 	: data.task.tags.concat(integration.auto_tags || []),
+			project : selectedProject
+		}
+
+		sendNewTask(newTask, username, payload.response_url);
+	});
+}
+
+/**
+ * Creates a new task in OM and sends result back to slack
+ * 
+ * @param  {Object} task         
+ * @param  {String} username     
+ * @param  {String} response_url 
+ */
+function sendNewTask(task, username, response_url) {
+	superagent
+		.post(Endpoints.addTask())
+		.set('Authorization', Endpoints.slackAuthToken(username))
+		.send(newTask)
+		.then(response => response.body)
+		.then(body => {
+			log('info', 'slack-createtask-response', JSON.stringify(body));
+			// send response to slack
+			sendResponseToSlack(response_url, { text: 'Task created' });
+		})
+		.catch(error => {
+			log('error', 'slack-createtask-response', error.message);
+			sendResponseToSlack(response_url, { text: error.message });
+		})
 }
 
 /**
