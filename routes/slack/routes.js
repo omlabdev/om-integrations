@@ -563,7 +563,7 @@ function sendNewTask(task, username, response_url) {
 	superagent
 		.post(Endpoints.addTask())
 		.set('Authorization', Endpoints.slackAuthToken(username))
-		.send(newTask)
+		.send(task)
 		.then(response => response.body)
 		.then(body => {
 			log('info', 'slack-createtask-response', JSON.stringify(body));
