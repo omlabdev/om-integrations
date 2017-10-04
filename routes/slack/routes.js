@@ -480,7 +480,7 @@ function initCreateTask(req, res) {
 	});
 
 	// fetch projects and show combo to select one
-	showProjectSelection(req.body.response_url, responseText);
+	showProjectSelection(req.body.response_url, responseText, user_name);
 }
 
 /**
@@ -491,7 +491,7 @@ function initCreateTask(req, res) {
  * @param  {String} response_url 
  * @param  {String} responseText Main message
  */
-function showProjectSelection(response_url, responseText) {
+function showProjectSelection(response_url, responseText, username) {
 	superagent
 		.get(Endpoints.getProjects())
 		.set('Authorization', Endpoints.slackAuthToken(username))
