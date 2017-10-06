@@ -17,27 +17,15 @@ module.exports = router;
 
 const usersToSlashCommand = {}
 
-// *
-//  * When an interactive message action is tapped/selected,
-//  * the body if the request contains all data inside an 
-//  * encoded field named *payload*.
-//  * Here we just flag the message as is_callback to know we
-//  * need to go fetch the data from the payload.
-//  * The payload is also decoded into a JS object.
-//  * 
-//  * @param  {Object}   req  
-//  * @param  {Object}   res  
-//  * @param  {Function} next 
- 
-// function flagInteractiveMessage(req, res, next) {
-// 	if (req.body.payload) {
-// 		req.is_callback = true;
-// 		req.body.payload = JSON.parse(req.body.payload);
-// 		req.body.token = req.body.payload.token;
-// 	}
-// 	next();
-// } 
-
+/**
+ * When an interactive message is sent, the body contains just
+ * a json encoded string with all data under the key 'payload'.
+ * Here we decode it and assigns it to the req.body object.
+ * 
+ * @param  {Object}   req 
+ * @param  {Object}   res 
+ * @param  {Function} next
+ */
 function parsePayload(req, res, next) {
 	req.body = JSON.parse(req.body.payload);
 	next();
@@ -47,7 +35,8 @@ function parsePayload(req, res, next) {
  * Validates that this POST is coming from Slack
  */
 function validateToken(req, res, next) {
-	console.log(req.body);
+	if (process.env.NODE_ENV !== 'production') next();
+
 	const token = req.body.token;
 	if (token !== tokens.SLACK_TOKEN) return res.sendStatus(403);
 	next();
@@ -72,47 +61,11 @@ function resolveSlashCommand(req, res, next) {
 			return initAddEntryMenu(req, res);
 		case 'auth': // get auth link
 			return getAuthLink(req, res);
+		case 'objective': // create objective
+			return initCreateObjective(req, res, next);
 		default: // unknown command
 			return unknownCommand(req, res);
 	}
-}
-
-/**
- * Simple response when no known command is requested
- * @param  {Object} req 
- * @param  {Object} res 
- */
-function unknownCommand(req, res) {
-	res.json({
-		text : "Unknown command"
-	})
-}
-
-/**
- * Responds the command with the auth link the user
- * should use to access OM.
- * 
- * @param  {Object} req
- * @param  {Object} res
- */
-function getAuthLink(req, res) {
-	const username = req.body.user_name;
-	const response_url = req.body.response_url;
-	superagent
-		.get(Endpoints.getAuthToken())
-		.set('Authorization', Endpoints.slackAuthToken(username))
-		.then(response => response.body)
-		.then(body => {
-			const link = body.link;
-			sendResponseToSlack(response_url, { text: link });
-		})
-		.catch(error => {
-			log('error', 'get-auth-token-response', error.message);
-			sendResponseToSlack(response_url, { text: error.message });
-		});
-
-	// respond immediately
-	res.json({ text : 'Please wait...', "response_type" : "in_channel" })
 }
 
 /**
@@ -144,9 +97,227 @@ function resolveCallback(req, res) {
 		case 'add_task_project_selected':
 			return createTaskOnProjectSelected(req, res);
 
+		case 'objective_option_chosen':
+			return onCreateObjectiveOptionChosen(req, res);
+
 		default:
 			return unknownCommand(req, res);
 	}
+}
+
+/**
+ * Simple response when no known command is requested
+ * @param  {Object} req 
+ * @param  {Object} res 
+ */
+function unknownCommand(req, res) {
+	res.json({
+		text : "Unknown command"
+	})
+}
+
+/**
+ * Shows the create objective menu with a projects combo
+ * and a tasks combo that loads based on the selected project
+ * 
+ * @param  {Object} req 
+ * @param  {Object} res 
+ */
+function initCreateObjective(req, res) {
+	const username = req.body.user_name;
+	const response_url = req.body.response_url;
+
+	if (!usersToSlashCommand[username]) // init if not exists
+		usersToSlashCommand[username] = {};
+
+	// respond fast in the meantime...
+	res.json({ text : 'Please wait...', "response_type" : "in_channel" });
+
+	usersToSlashCommand[username]['objective'] = {
+		selection : {
+			project : null,
+			task : null
+		},
+		options : { 
+			project : null,
+			task : null
+		}
+	}
+
+	showCreateObjectiveMenu(req, res);
+}
+
+/**
+ * Returns a response to slack with initially 1 combo to choose
+ * a project, and after a project is chosen shows another one
+ * containing available tasks.
+ * 
+ * The projects and tasks have to be retrieved from om-services. 
+ * Once they're fetched we call this funcition again to continue 
+ * the rendering.
+ * 
+ * @param  {Object} req 
+ * @param  {Object} res 
+ */
+function showCreateObjectiveMenu(req, res) {
+	const payload = req.body;
+	const username = payload.user ? payload.user.name : payload.user_name;
+	const response_url = payload.response_url;
+	const data = usersToSlashCommand[username]['objective'];
+
+	if (data.options.project === null) {
+		// go fetch the projects and then try again this function
+		return fetchProjects(username, (error, projects) => {
+			if (error) return sendResponseToSlack(response_url, { text: error.message });
+			data.options.project = projects.map(p => {return { text: p.name, value: p._id }});
+			showCreateObjectiveMenu(req, res); // show again
+		})
+	}
+	else if (data.selection.project && data.options.task === null) {
+		// go fetch the tasks for the selected project and try
+		// again this function
+		return fetchTasksForProject(data.selection.project.value, username, (error, tasks) => {
+			if (error) return sendResponseToSlack(response_url, { text: error.message });
+			data.options.task = tasks.map(t => {return { text: t.title, value: t._id }});
+			showCreateObjectiveMenu(req, res); // show again
+		})		
+	}
+	else {
+		renderCreateObjectiveMenuWithOptions(data.options, data.selection, response_url);
+	}
+}
+
+/**
+ * Renders (by sending a JSON to slack) the new objective menu.
+ * The menu consists on two combos: one for rojects and one for
+ * tasks.
+ *
+ * When the user selects the project, the tasks are loaded with
+ * tasks belonging to that project.
+ * 
+ * @param  {Array} options   
+ * @param  {Array} selection 
+ * @param  {Object} res       
+ */
+function renderCreateObjectiveMenuWithOptions(options, selection, response_url) {
+	const actions = [{
+		name : 'project',
+		type : 'select',
+		options : options.project,
+		selected_options : selection.project ? [selection.project] : []
+	}]
+	if (selection.project !== null) { // if project selected, show tasks combo
+		actions.push({
+			name : 'task',
+			type : 'select',
+			options : options.task,
+			selected_options : selection.task ? [selection.task] : []
+		});
+	}
+	if (selection.task !== null) { // if everything has been selected, show create button
+		actions.push({
+			name : 'create',
+			type : 'button',
+			text : 'Create objective',
+			value : 'create'
+		});
+	}
+	const attachments = [{
+		text: 'Choose a project',
+		color : getRandomColor(),
+		callback_id: 'objective_option_chosen',
+		actions
+	}];
+	// send response to slack
+	sendResponseToSlack(response_url, { text: "Let's create your new objective", attachments });
+}
+
+/**
+ * This function is called when the user selects either a project or
+ * a task from the new objective menu.
+ *
+ * If the user has selected a value for both options, the objective
+ * objective is created and a success message is rendered. If not,
+ * the value is added to the in-memory storage and the menu is
+ * re-rendered again.
+ * 
+ * @param  {Object} req
+ * @param  {Object} res 
+ */
+function onCreateObjectiveOptionChosen(req, res) {
+	const username = req.body.user.name;
+	const data = usersToSlashCommand[username]['objective'];
+	const response_url = req.body.response_url;
+
+	// respond fast in the meantime...
+	res.json({ text : 'Please wait...', "response_type" : "in_channel" });
+
+	const selectedField = req.body.actions[0].name;
+
+	// if create button has been clicked, create task and
+	// finish process
+	if (selectedField === 'create') {
+		return createObjective(data.selection.task.value, username, response_url);
+	}
+
+	const value =  req.body.actions[0].selected_options[0].value;
+	const text = data.options[selectedField].filter(e => e.value === value)[0].text;
+
+	// store selected value in in-memory storage
+	data.selection[selectedField] = { value, text };
+
+	// if project was selected, reset tasks
+	if (selectedField === 'project') {
+		data.options.task = null;
+		data.selection.task = null;
+	}
+
+	return showCreateObjectiveMenu(req, res);
+}
+
+function createObjective(taskId, username, response_url) {
+	superagent
+		.post(Endpoints.createObjective())
+		.set('Authorization', Endpoints.slackAuthToken(username))
+		.send({
+			related_task 	: taskId,
+			level 		 	: 'day',
+			objective_date 	: Date.now()
+		})
+		.then(() => {
+			sendResponseToSlack(response_url, { text: ':heavy_check_mark: Objective created' });
+		})
+		.catch((error) => {
+			log('error', 'slack-create-objective-response', error.message);
+			sendResponseToSlack(response_url, { text: error.message });
+		})
+}
+
+/**
+ * Responds the command with the auth link the user
+ * should use to access OM.
+ * 
+ * @param  {Object} req
+ * @param  {Object} res
+ */
+function getAuthLink(req, res) {
+	const username = req.body.user_name;
+	const response_url = req.body.response_url;
+	superagent
+		.get(Endpoints.getAuthToken())
+		.set('Authorization', Endpoints.slackAuthToken(username))
+		.then(response => response.body)
+		.then(body => {
+			const link = body.link;
+			sendResponseToSlack(response_url, { text: link });
+		})
+		.catch(error => {
+			log('error', 'get-auth-token-response', error.message);
+			sendResponseToSlack(response_url, { text: error.message });
+		});
+
+	// respond immediately
+	res.json({ text : 'Please wait...', "response_type" : "in_channel" })
 }
 
 /**
@@ -178,7 +349,7 @@ function initAddEntryMenu(req, res) {
 			objective : null,
 			time : require('./time_options') 
 		},
-		response : null, // om-services responso to undo operation
+		response : null, // om-services response to undo operation
 		original_message : null // completed on first interaction
 	}
 
@@ -233,7 +404,7 @@ function showAddEntryMenu(req, res) {
  */
 function renderAddEntryMenuWithOptions(options, selection, response_url) {
 	const attachments = [{
-		text: 'Choose an objective and how much time to add',
+		text: 'Choose an objective and how much time to add:',
 		color : getRandomColor(),
 		callback_id: 'work_entry_option_chosen',
 		actions: [
@@ -252,7 +423,7 @@ function renderAddEntryMenuWithOptions(options, selection, response_url) {
 		]
 	}];
 	// send response to slack
-	sendResponseToSlack(response_url, { text: "Choose an objective and time", attachments });
+	sendResponseToSlack(response_url, { text: "Let's create your work entry", attachments });
 }
 
 /**
@@ -463,11 +634,7 @@ function initCreateTask(req, res) {
 		tags = matches[1].split(',').map(t => t.trim());
 	}
 
-	const newTask = {
-		title, 
-		tags,
-		origin : 'slack'
-	};
+	const newTask = { title, tags, origin : 'slack' };
 
 	// add task infomation to on-memory temp storage
 	if (!usersToSlashCommand[user_name]) usersToSlashCommand[user_name] = {};
@@ -498,28 +665,62 @@ function initCreateTask(req, res) {
  * @param  {String} responseText Main message
  */
 function showProjectSelection(response_url, responseText, username) {
+	fetchProjects((error, projects) => {
+		if (error) return sendResponseToSlack(response_url, { text: error.message });
+		sendResponseToSlack(response_url, {
+			text : '',
+			"attachments"   : [{
+				text: 'Choose a project',
+				color : getRandomColor(),
+				callback_id: 'add_task_project_selected',
+				actions: [{
+					name : 'project',
+					type : 'select',
+					options : projects.map(p => { return { text: p.name, value: p._id } })
+				}]
+			}]
+		})
+	})
+}
+
+/**
+ * Fetches projects from OM
+ *
+ * @param  {String} username 
+ * @param  {Function} cb (error, projects)
+ */
+function fetchProjects(username, cb) {
 	superagent
 		.get(Endpoints.getProjects())
 		.set('Authorization', Endpoints.slackAuthToken(username))
-		.then(response => response.body.projects)
-		.then(projects => {
-			sendResponseToSlack(response_url, {
-				text : '',
-				"attachments"   : [{
-			    	text: 'Choose a project',
-					color : getRandomColor(),
-					callback_id: 'add_task_project_selected',
-					actions: [{
-						name : 'project',
-						type : 'select',
-						options : projects.map(p => { return { text: p.name, value: p._id } })
-					}]
-			    }]
-			})
+		.end((error, response) => {
+			if (error) {
+				log('error', 'slack-get-projects-response', error.message);
+				return cb(error);
+			}
+			return cb(null, response.body.projects);
 		})
-		.catch(error => {
-			log('error', 'slack-get-projects-response', error.message);
-			sendResponseToSlack(response_url, { text: error.message });
+}
+
+/**
+ * Fetches tasks for the project with the given id
+ * from OM
+ *
+ * @param  {String} pid Project id
+ * @param  {String} username 
+ * @param  {Function} cb (error, tasks)
+ */
+function fetchTasksForProject(pid, username, cb) {
+	const query = { project : pid };
+	superagent
+		.get(Endpoints.getTasks(query))
+		.set('Authorization', Endpoints.slackAuthToken(username))
+		.end((error, response) => {
+			if (error) {
+				log('error', 'slack-get-tasks-response', error.message);
+				return cb(error);
+			}
+			return cb(null, response.body.tasks);
 		})
 }
 

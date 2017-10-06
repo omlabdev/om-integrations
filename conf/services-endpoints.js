@@ -22,6 +22,8 @@ module.exports = {
 	deleteWorkEntry : (objectiveId, workEntryId) => `${BASE_URL}/api/${API_VERSION}/objectives/${objectiveId}/work-entries/${workEntryId}`,
 	getUsers 		: () => `${BASE_URL}/api/${API_VERSION}/users`,
 	getIntegrations	: () => `${BASE_URL}/api/${API_VERSION}/admin/integrations`,
+	getTasks		: (query) => `${BASE_URL}/api/${API_VERSION}/tasks/1?${toQueryString(query)}`,
+	createObjective : () => `${BASE_URL}/api/${API_VERSION}/objectives/add`,
 
 	authToken 		: () => 'Basic: bmljbw==:bmljbw==',
 	slackAuthToken  : (username) => `Slack: ${username}:${tokens.SLACK_TOKEN}`,
@@ -39,3 +41,9 @@ module.exports = {
 getYear = () => moment.utc().format('YYYY');
 getMonth = () => moment.utc().format('MM');
 getDay = () => moment.utc().format('DD');
+
+toQueryString = (obj) => {
+	// skip empty or null fields
+	const validKeys = Object.keys(obj).filter(k => !!obj[k]);
+	return validKeys.map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`).join('&');
+}
