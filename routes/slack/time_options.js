@@ -1,38 +1,11 @@
-module.exports = [
-	{
-		text : '00:30',
-		value : '1800'
-	},
-	{
-		text : '01:00',
-		value : '3600'
-	},
-	{
-		text : '01:30',
-		value : '5400'
-	},
-	{
-		text : '02:00',
-		value : '7200'
-	},
-	{
-		text : '02:30',
-		value : '9000'
-	},
-	{
-		text : '03:00',
-		value : '10800'
-	},
-	{
-		text : '04:00',
-		value : '14400'
-	},
-	{
-		text : '05:00',
-		value : '18000'
-	},
-	{
-		text : '06:00',
-		value : '21600'
-	}
-]
+
+const hourOptions = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+const options = hourOptions.map(o => { 
+	const seconds = o * 3600;
+	const formattedHour = String(Math.floor(o) + 100).substring(1);
+	const formattedMinutes = String((o - Math.floor(o)) * 60);
+	const formatted = formattedHour + ':' + formattedMinutes;
+	return { text: formatted, value: seconds }
+})
+
+module.exports = options;
