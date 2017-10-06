@@ -15,7 +15,7 @@ exports.sendMessage = function(userId, message, cb) {
 			token : 'xoxp-3502577971-3502577973-249466836722-9f23edee1d6a669e3272a574f2b12167',
 			channel : channelId,
 			as_user : false,
-			icon_emoji : ':chart_with_upwards_trend:',
+			icon_emoji : 'chart_with_upwards_trend',
 			username : 'OM Git'
 		}, message);
 		superagent
