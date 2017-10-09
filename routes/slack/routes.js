@@ -55,7 +55,7 @@ function resolveSlashCommand(req, res, next) {
 
 	const command = req.body.text.trim().split(" ")[0].toLowerCase();
 	switch (command) {
-		case 'task': // creates a new tasl
+		case 'task': // creates a new task
 			return initCreateTask(req, res, next);
 		case 'time': // adds a work entry
 			return initAddEntryMenu(req, res);
