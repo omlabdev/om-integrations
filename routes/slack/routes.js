@@ -692,10 +692,12 @@ function showProjectSelection(response_url, responseText, username) {
  * @param  {Function} cb (error, projects)
  */
 function fetchProjects(username, cb) {
+	log('info', 'slack-request-fetch-projects', 'username: ' + username);
 	superagent
 		.get(Endpoints.getProjects())
 		.set('Authorization', Endpoints.slackAuthToken(username))
 		.end((error, response) => {
+			log('info', 'slack-response-fetch-projects', JSON.stringify({error, response}));
 			if (error) {
 				log('error', 'slack-get-projects-response', error.message);
 				return cb(error);
