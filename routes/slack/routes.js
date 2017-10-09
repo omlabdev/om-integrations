@@ -472,6 +472,8 @@ function onAddEntryOptionChosen(req, res) {
 	const data = usersToSlashCommand[username]['entry'];
 	const response_url = req.body.response_url;
 
+	log('info', 'slack-add-entry-option-slected', JSON.stringify(req.body));
+
 	// respond fast in the meantime...
 	res.json({ text : 'Please wait...', "response_type" : "in_channel" });
 
