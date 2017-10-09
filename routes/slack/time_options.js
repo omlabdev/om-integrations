@@ -5,7 +5,7 @@ const options = hourOptions.map(o => {
 	const formattedHour = String(Math.floor(o) + 100).substring(1);
 	const formattedMinutes = String(((o - Math.floor(o)) * 60) + 100).substring(1);
 	const formatted = formattedHour + ':' + formattedMinutes;
-	return { text: formatted, value: seconds }
+	return { text: formatted, value: String(seconds) }
 })
 
 module.exports = options;
