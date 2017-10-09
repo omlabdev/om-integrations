@@ -667,7 +667,7 @@ function initCreateTask(req, res) {
  * @param  {String} responseText Main message
  */
 function showProjectSelection(response_url, responseText, username) {
-	fetchProjects((error, projects) => {
+	fetchProjects(username, (error, projects) => {
 		if (error) return sendResponseToSlack(response_url, { text: error.message });
 		sendResponseToSlack(response_url, {
 			text : '',
