@@ -6,54 +6,63 @@ const Endpoints = require('./../../conf/services-endpoints');
 const getIntegrationWithId = require('../../utils/get_integration');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
-router.post('/webhook/:integrationId', webhook);
+router.post('/webhook/task-create/:integrationId', taskCreated);
+router.post('/webhook/task-update/:integrationId', taskUpdated);
 
 module.exports = router;
 
-function webhook(req, res) {
-	log('info', 'teamwork-webhook', JSON.stringify(req.body));
+/**
+ * TASK.CREATED webhook
+ * 
+ * @param  {Objecy} req 
+ * @param  {Objecy} res 
+ */
+function taskCreated(req, res) {
+	log('info', 'teamwork-webhook-task-create', JSON.stringify(req.body));
 
-	// just log for now
-	// changed event to TASK.UPDATED
+	const { id, name, priority, status, tags, projectId, description } = req.body.task;
+	const listName = req.body.taskList.name;
 
-	// const { id, name, priority, status, tags, projectId, description } = req.body.task;
-	// const listName = req.body.taskList.name;
+	if (status !== "new") {
+		log('info', 'teamwork-webhook-status', 'Status is NOT new. Status = ' + status + '. FINISHING HERE');
+		return;
+	}
 
-	// if (status !== "new") {
-	// 	log('info', 'teamwork-webhook-status', 'Status is NOT new. Status = ' + status + '. FINISHING HERE');
-	// 	return;
-	// }
+	const integrationId = req.params.integrationId;
+	const auth = Endpoints.authToken();
+	getIntegrationWithId(integrationId, auth, (error, integration) => {
+		if (error) {
+			return log('error', 'teamwork-get-integration-response', JSON.stringify(error));
+		}
 
-	// const integrationId = req.params.integrationId;
-	// const auth = Endpoints.authToken();
-	// getIntegrationWithId(integrationId, auth, (error, integration) => {
-	// 	if (error) {
-	// 		return log('error', 'teamwork-get-integration-response', JSON.stringify(error));
-	// 	}
+		// get project _id
+		const mappingKey = projectId.toString();
+		const project = integration.mappings[mappingKey];
+		if (!project) {
+			return log('error', 'teamwork-integration-mapping-missing', 'Mapping for project ' + mappingKey + ' does not exist on integration ' + integration._id);
+		}
 
-	// 	// get project _id
-	// 	const mappingKey = projectId.toString();
-	// 	const project = integration.mappings[mappingKey];
-	// 	if (!project) {
-	// 		return log('error', 'teamwork-integration-mapping-missing', 'Mapping for project ' + mappingKey + ' does not exist on integration ' + integration._id);
-	// 	}
+		const site = `https://${integration.meta.account}.teamwork.com`;
+		const link = site + '/index.cfm#tasks/' + id;
+		const newTask = {
+			title : name, 
+			description : description ? description : '',
+			tags : tags.concat(integration.auto_tags || []),
+			project,
+			origin : 'teamwork',
+			external_url : link,
+			external_id : id
+		}
 
-	// 	const site = `https://${integration.meta.account}.teamwork.com`;
-	// 	const link = site + '/index.cfm#tasks/' + id;
-	// 	const newTask = {
-	// 		title : name, 
-	// 		description : description ? description : '',
-	// 		tags : tags.concat(integration.auto_tags || []),
-	// 		project,
-	// 		origin : 'teamwork',
-	// 		external_url : link,
-	// 		external_id : id
-	// 	}
-
-	// 	sendNewTask(newTask);
-	// })
+		sendNewTask(newTask);
+	})
 	
 	// respond immediately
+	res.sendStatus(200);
+}
+
+function taskUpdated(req, res) {
+	log('info', 'teamwork-webhook-task-update', JSON.stringify(req.body));
 	res.sendStatus(200);
 }
 
