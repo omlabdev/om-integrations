@@ -33,7 +33,7 @@ function taskCreated(req, res) {
 		if (!task) return;
 
 		onTaskCreatedOrUpdated(task, integration);
-	}
+	})
 
 
 	// const integrationId = req.params.integrationId;
