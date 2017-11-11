@@ -105,6 +105,8 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 	// fetch the task from TW to check whether is complete.
 	// if not, check if it is assigned to someone we care
 	fetchTaskFromTeamwork(taskData.id, integration, (error, task) => {
+		if (error) return log('error', 'teamwork-fetch-task-response', JSON.stringify(error));
+
 		log('info', 'teamwork-fetch-task-response', JSON.stringify(task));
 
 		if (task.completed)
