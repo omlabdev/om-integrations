@@ -34,6 +34,8 @@ module.exports = {
 	slackWebhook	: () => 'https://hooks.slack.com/services/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',
 	slackChatApi	: () => `https://slack.com/api/chat.postMessage?token=${tokens.SLACK_APP}`,
 
+	getTeamworkTask	: (account, apiUser, taskId) => `https://${apiUser}:xxx@${account}.teamwork.com/tasks/${taskId}.json`,
+
 	getSlackUserIdFromUsername : () => `https://slack.com/api/users.list?token=${tokens.SLACK_APP}`,
 	getSlackChannelIdFromUserId : () => `https://slack.com/api/im.list?token=${tokens.SLACK_APP}`
 }
