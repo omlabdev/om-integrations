@@ -124,8 +124,10 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 
 function fetchTaskFromTeamwork(taskId, integration, cb) {
 	const { account, token } = integration.meta;
+	const url = Endpoints.getTeamworkTask(account, token, taskId);
+	log('info', 'teamwork-fetch-task-from-teamwork', url);
 	superagent
-		.get(Endpoints.getTeamworkTask(account, token, taskId))
+		.get(url)
 		.end((error, response) => {
 			if (error) return cb(error);
 			cb(null, response.body['todo-item']);
