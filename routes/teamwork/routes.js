@@ -73,10 +73,10 @@ function getTaskFromRequestBody(body) {
 		title : name, 
 		description : description ? description : '',
 		tags : tags.concat(integration.auto_tags || []),
-		project,
 		origin : 'teamwork',
 		external_url : link,
-		external_id : id
+		external_id : id,
+		project : projectId // teamwork project id
 	}
 }
 
@@ -92,9 +92,22 @@ function onTaskCreatedOrUpdated(taskData, integrationId) {
 			return log('error', 'teamwork-get-integration-response', JSON.stringify(error));
 		}
 
+		// check if the project the task is associated is configured
+		// for this integration
+		const mappingKey = taskData.project.toString();
+		const project = integration.mappings[mappingKey];
+		if (!project) {
+			return log('error', 'teamwork-integration-mapping-missing', 'Mapping for project ' + mappingKey + ' does not exist on integration ' + integration._id);
+		}
+
+		// replace TW project id with OM's project id
+		taskData.project = project;
+
 		// fetch the task from TW to check whether is complete.
 		// if not, check if it is assigned to someone we care
 		fetchTaskFromTeamwork(taskData.id, integration, (error, task) => {
+			log('info', 'teamwork-fetch-task-response', JSON.stringify(task));
+
 			if (task.completed)
 				return log('info', 'teamwork-fetch-task-response', 'Task is already completed');
 			
@@ -102,6 +115,7 @@ function onTaskCreatedOrUpdated(taskData, integrationId) {
 			if (!assigned) {
 				return log('info', 'teamwork-fetch-task-response', 'Task is not assigned to anyone');
 			} else {
+				log('info', 'teamwork-fetch-task-response', 'Task will be created');
 				sendNewTask(taskData);
 			}
 		})
