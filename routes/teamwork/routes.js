@@ -63,24 +63,6 @@ function getTaskFromRequestBody(body, integration) {
 	}
 }
 
-// function taskUpdated(req, res) {
-// 	log('info', 'teamwork-webhook-task-update', JSON.stringify(req.body));
-// 	// respond immediately
-// 	res.sendStatus(200);
-	
-// 	const integrationId = req.params.integrationId;
-
-// 	const auth = Endpoints.authToken();
-// 	getIntegrationWithId(integrationId, auth, (error, integration) => {
-// 		if (error) return log('error', 'teamwork-get-integration-response', JSON.stringify(error));
-
-// 		const task = getTaskFromRequestBody(req.body, integration);
-// 		if (!task) return;
-
-// 		onTaskCreatedOrUpdated(task, integration);
-// 	})	
-// }
-
 function onTaskCreatedOrUpdated(taskData, integration) {
 	// fetch the task from TW to check whether is complete.
 	// if not, check if it is assigned to someone we care
