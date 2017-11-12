@@ -80,19 +80,18 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 
 		console.log('ACA 2');
 		
-		let assigned = task['responsible-party-ids'] !== undefined;
+		const assigned = task['responsible-party-ids'] !== undefined;
 		if (!assigned)
 			return log('info', 'teamwork-webhook-4', 'Task is not assigned to anyone');
 
 
 		console.log('ACA 3');
 
-		console.log(assigned);
-
 		// split assigned in case there's more than one
-		assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
+		const assignedIds = task['responsible-party-ids'].split(',')
+			.map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 
-		console.log(assigned);
+		console.log(assignedIds);
 
 		// update description with the fetched description from TW
 		taskData = Object.assign(taskData, {
@@ -112,9 +111,9 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 
 		// check if the task is assigned to a user we care
 		mappedUsers = mappedUsers.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
-		for (var i = 0; i < assigned.length; i++) {
+		for (var i = 0; i < assignedIds.length; i++) {
 			console.log('ACA 6.1');
-			if (mappedUsers.indexOf(assigned[i]) >= 0) {
+			if (mappedUsers.indexOf(assignedIds[i]) >= 0) {
 				console.log('ACA 6.2');
 				return sendNewTask(taskData);
 			}
@@ -140,9 +139,6 @@ function fetchTaskFromTeamwork(taskId, integration, cb) {
 		.end((error, response) => {
 			if (error) return cb(error);
 			if (!response.body['todo-item']) return cb(new Error('task not found on TW'));
-			
-			console.log(response);
-
 			cb(null, response.body['todo-item']);
 		})
 }
