@@ -64,6 +64,7 @@ function getTaskFromRequestBody(body, integration) {
 }
 
 function onTaskCreatedOrUpdated(taskData, integration) {
+	console.log('onTaskCreatedOrUpdated()');
 	// fetch the task from TW to check whether is complete.
 	// if not, check if it is assigned to someone we care
 	fetchTaskFromTeamwork(taskData.external_id, integration, (error, task) => {
