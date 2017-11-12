@@ -97,7 +97,7 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 			return log('info', 'teamwork-fetch-task-response', 'Task is not assigned to anyone');
 
 		// split assigned in case there's more than one
-		let assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
+		assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 
 		// update description with the fetched description from TW
 		taskData = Object.assign(taskData, {
