@@ -67,9 +67,12 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 	// fetch the task from TW to check whether is complete.
 	// if not, check if it is assigned to someone we care
 	fetchTaskFromTeamwork(taskData.external_id, integration, (error, task) => {
-		if (error) return log('error', 'teamwork-fetch-task-response-1', JSON.stringify(error));
+		if (error) {
+			return log('error', 'teamwork-fetch-task-response-1', JSON.stringify(error));
+		}
 
 		log('info', 'teamwork-fetch-task-response-2', JSON.stringify(task));
+		console.log('ACA');
 
 		if (task.completed)
 			return log('info', 'teamwork-webhook-3', 'Task is already completed');
@@ -81,6 +84,8 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 		// split assigned in case there's more than one
 		assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 
+		console.log(assigned);
+
 		// update description with the fetched description from TW
 		taskData = Object.assign(taskData, {
 			title: task.content,
@@ -90,6 +95,8 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 		let mappedUsers = integration.meta['users'];
 		// no mapped users to look for. just create
 		if (!mappedUsers) return sendNewTask(taskData);
+
+		console.log(mappedUsers);
 
 		// check if the task is assigned to a user we care
 		mappedUsers = mappedUsers.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
