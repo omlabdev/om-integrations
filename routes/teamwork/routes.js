@@ -77,11 +77,16 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 
 		if (task.completed)
 			return log('info', 'teamwork-webhook-3', 'Task is already completed');
+
+		console.log('ACA 2');
 		
 		let assigned = task['responsible-party-ids'] !== undefined;
 		if (!assigned)
 			return log('info', 'teamwork-webhook-4', 'Task is not assigned to anyone');
 
+
+		console.log('ACA 3');
+		
 		// split assigned in case there's more than one
 		assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 
@@ -125,6 +130,10 @@ function fetchTaskFromTeamwork(taskId, integration, cb) {
 		.get(url)
 		.end((error, response) => {
 			if (error) return cb(error);
+			if (!response.body['todo-item']) return cb(new Error('task not found on TW'));
+			
+			console.log(response);
+
 			cb(null, response.body['todo-item']);
 		})
 }
