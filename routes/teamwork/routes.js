@@ -86,7 +86,9 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 
 
 		console.log('ACA 3');
-		
+
+		console.log(assigned);
+
 		// split assigned in case there's more than one
 		assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 
@@ -97,6 +99,8 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 			title: task.content,
 			description: task.description
 		})
+
+		console.log('ACA 4');
 		
 		let mappedUsers = integration.meta['users'];
 		// no mapped users to look for. just create
@@ -104,11 +108,16 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 
 		console.log(mappedUsers);
 
+		console.log('ACA 5');
+
 		// check if the task is assigned to a user we care
 		mappedUsers = mappedUsers.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 		for (var i = 0; i < assigned.length; i++) {
-			if (mappedUsers.indexOf(assigned[i]) >= 0)
+			console.log('ACA 6.1');
+			if (mappedUsers.indexOf(assigned[i]) >= 0) {
+				console.log('ACA 6.2');
 				return sendNewTask(taskData);
+			}
 		}
 
 		log('info', 'teamwork-webhook', 'Task is not assigned to any mapped user');
