@@ -64,7 +64,6 @@ function getTaskFromRequestBody(body, integration) {
 }
 
 function onTaskCreatedOrUpdated(taskData, integration) {
-	console.log('onTaskCreatedOrUpdated()');
 	// fetch the task from TW to check whether is complete.
 	// if not, check if it is assigned to someone we care
 	fetchTaskFromTeamwork(taskData.external_id, integration, (error, task) => {
@@ -73,48 +72,32 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 		}
 
 		log('info', 'teamwork-fetch-task-response-2', JSON.stringify(task));
-		console.log('ACA');
 
 		if (task.completed)
 			return log('info', 'teamwork-webhook-3', 'Task is already completed');
 
-		console.log('ACA 2');
-		
 		const assigned = task['responsible-party-ids'] !== undefined;
 		if (!assigned)
 			return log('info', 'teamwork-webhook-4', 'Task is not assigned to anyone');
 
-
-		console.log('ACA 3');
-
 		// split assigned in case there's more than one
 		const assignedIds = task['responsible-party-ids'].split(',')
 			.map(u => u.replace(/\s/g, '')).filter(u => u !== '');
-
-		console.log(assignedIds);
 
 		// update description with the fetched description from TW
 		taskData = Object.assign(taskData, {
 			title: task.content,
 			description: task.description
 		})
-
-		console.log('ACA 4');
 		
 		let mappedUsers = integration.meta['users'];
 		// no mapped users to look for. just create
 		if (!mappedUsers) return sendNewTask(taskData);
 
-		console.log(mappedUsers);
-
-		console.log('ACA 5');
-
 		// check if the task is assigned to a user we care
 		mappedUsers = mappedUsers.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 		for (var i = 0; i < assignedIds.length; i++) {
-			console.log('ACA 6.1');
 			if (mappedUsers.indexOf(assignedIds[i]) >= 0) {
-				console.log('ACA 6.2');
 				return sendNewTask(taskData);
 			}
 		}
