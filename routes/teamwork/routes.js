@@ -96,7 +96,14 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 		if (!assigned) {
 			return log('info', 'teamwork-fetch-task-response', 'Task is not assigned to anyone');
 		} else {
-			log('info', 'teamwork-fetch-task-response', 'Task will be created');
+			log('info', 'teamwork-fetch-task-response', 'Task will be created or updated');
+
+			// update description with the fetched description from TW
+			taskData = Object.assign(taskData, {
+				title: task.content,
+				description: task.description
+			})
+
 			sendNewTask(taskData);
 		}
 	})
