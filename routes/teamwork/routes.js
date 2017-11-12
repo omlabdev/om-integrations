@@ -92,20 +92,31 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 		if (task.completed)
 			return log('info', 'teamwork-fetch-task-response', 'Task is already completed');
 		
-		const assigned = task['responsible-party-ids'] !== undefined;
-		if (!assigned) {
+		let assigned = task['responsible-party-ids'] !== undefined;
+		if (!assigned)
 			return log('info', 'teamwork-fetch-task-response', 'Task is not assigned to anyone');
-		} else {
-			log('info', 'teamwork-fetch-task-response', 'Task will be created or updated');
 
-			// update description with the fetched description from TW
-			taskData = Object.assign(taskData, {
-				title: task.content,
-				description: task.description
-			})
+		// split assigned in case there's more than one
+		let assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
 
-			sendNewTask(taskData);
+		// update description with the fetched description from TW
+		taskData = Object.assign(taskData, {
+			title: task.content,
+			description: task.description
+		})
+		
+		let mappedUsers = integration.meta['users'];
+		// no mapped users to look for. just create
+		if (!mappedUsers) return sendNewTask(taskData);
+
+		// check if the task is assigned to a user we care
+		mappedUsers = mappedUsers.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
+		for (var i = 0; i < assigned.length; i++) {
+			if (mappedUsers.indexOf(assigned[i]) >= 0)
+				return sendNewTask(taskData);
 		}
+
+		log('info', 'teamwork-webhook', 'Task is not assigned to any mapped user');
 	})
 }
 
@@ -134,6 +145,7 @@ function fetchTaskFromTeamwork(taskId, integration, cb) {
  * @param  {Object} task
  */
 function sendNewTask(task) {
+	log('info', 'teamwork-webhook', 'Task will be created or updated');
 	superagent
 		.post(Endpoints.addTask())
 		.set('Authorization', Endpoints.authToken())
