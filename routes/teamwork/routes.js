@@ -67,16 +67,16 @@ function onTaskCreatedOrUpdated(taskData, integration) {
 	// fetch the task from TW to check whether is complete.
 	// if not, check if it is assigned to someone we care
 	fetchTaskFromTeamwork(taskData.external_id, integration, (error, task) => {
-		if (error) return log('error', 'teamwork-fetch-task-response', JSON.stringify(error));
+		if (error) return log('error', 'teamwork-fetch-task-response-1', JSON.stringify(error));
 
-		log('info', 'teamwork-fetch-task-response', JSON.stringify(task));
+		log('info', 'teamwork-fetch-task-response-2', JSON.stringify(task));
 
 		if (task.completed)
-			return log('info', 'teamwork-fetch-task-response', 'Task is already completed');
+			return log('info', 'teamwork-webhook-3', 'Task is already completed');
 		
 		let assigned = task['responsible-party-ids'] !== undefined;
 		if (!assigned)
-			return log('info', 'teamwork-fetch-task-response', 'Task is not assigned to anyone');
+			return log('info', 'teamwork-webhook-4', 'Task is not assigned to anyone');
 
 		// split assigned in case there's more than one
 		assigned = assigned.split(',').map(u => u.replace(/\s/g, '')).filter(u => u !== '');
