@@ -1,5 +1,6 @@
 const superagent = require('superagent');
 const Endpoints = require('../conf/services-endpoints');
+const tokens = require('../conf/tokens');
 
 /**
  * Sends a message to the given user id (as a private
@@ -12,7 +13,7 @@ const Endpoints = require('../conf/services-endpoints');
 exports.sendMessage = function(userId, message, cb) {
 	getChannelIdForUserId(userId, (error, channelId) => {
 		const body = Object.assign({
-			token : 'xoxp-3502577971-3502577973-249466836722-9f23edee1d6a669e3272a574f2b12167',
+			token : tokens.SLACK_APP,
 			channel : channelId,
 			as_user : false,
 			icon_emoji : 'chart_with_upwards_trend',
