@@ -85,6 +85,7 @@ function sendSlackMessageOfferingWorkEntry(slackId, gitRepo, summary) {
 	}, (error, response) => {
 		if (error) return console.error(error);
 		if (!response.body.ok) return console.error(response.body.error);
+		log('info', 'slack-send-message', JSON.stringify(response));
 	})
 }
 
