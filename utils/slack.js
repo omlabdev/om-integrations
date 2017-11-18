@@ -15,9 +15,7 @@ exports.sendMessage = function(userId, message, cb) {
 		const body = Object.assign({
 			token : tokens.SLACK_APP,
 			channel : channelId,
-			as_user : false,
-			icon_emoji : 'chart_with_upwards_trend',
-			username : 'OM Git'
+			as_user : true
 		}, message);
 		superagent
 			.post(Endpoints.slackChatApi())
