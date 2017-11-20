@@ -1,5 +1,7 @@
 module.exports = {
 
+	/* slack app tokens used with Slack's API */
+
 	SLACK_APP_TOKEN	: 'xoxp-3502577971-3502577973-249466836722-9f23edee1d6a669e3272a574f2b12167',
 
 	SLACK_BOT_TOKEN : 'xoxb-274781105765-DnhdJk7I2S5hxTAoqsKtLyJa',
@@ -7,6 +9,8 @@ module.exports = {
 	SLACK_CLIENT_ID	: '3502577971.249605696933',
 
 	SLACK_CLIENT_SECRET : '398e0c770209048339805ef5718d3d83',
+
+	/* tokens used to authenticate to OM */
 
 	SLACK_TOKEN 	: 'biTlZ0Ica2fRNA4NFYLAWK33',
 
