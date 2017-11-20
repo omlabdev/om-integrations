@@ -36,8 +36,8 @@ module.exports = {
 
 	getTeamworkTask	: (account, apiUser, taskId) => `https://${apiUser}:xxx@${account}.teamwork.com/tasks/${taskId}.json`,
 
-	getSlackUserIdFromUsername : () => `https://slack.com/api/users.list?token=${tokens.SLACK_APP_TOKEN}`,
-	getSlackChannelIdFromUserId : () => `https://slack.com/api/im.list?token=${tokens.SLACK_APP_TOKEN}`
+	getSlackUserIdFromUsername : () => `https://slack.com/api/users.list?token=${tokens.SLACK_BOT_TOKEN}`,
+	getSlackChannelIdFromUserId : () => `https://slack.com/api/im.list?token=${tokens.SLACK_BOT_TOKEN}`
 }
 
 getYear = () => moment.utc().format('YYYY');
