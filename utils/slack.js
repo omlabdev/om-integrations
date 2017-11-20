@@ -34,11 +34,14 @@ exports.sendMessage = function(userId, message, cb) {
  * @param  {Function} cb     (error, channelId)
  */
 function getChannelIdForUserId(userId, cb) {
+	log('info', 'getChannelIdForUserId()', userId);
 	superagent
 		.get(Endpoints.getSlackChannelIdFromUserId())
 		.end((error, response) => {
 			if (error) return cb(error);
-			const channel = response.body.ims.filter(im => im.user === userId)[0];
+			const channels = response.body;
+			log('info', 'slack-get-channels-response', JSON.stringify(channels));
+			const channel = channels.ims.filter(im => im.user === userId)[0];
 			return cb(null, channel.id);
 		})
 }
@@ -54,10 +57,11 @@ exports.getUserIdFromUsername = function(username, cb) {
 	superagent
 		.get(Endpoints.getSlackUserIdFromUsername())
 		.end((error, response) => {
-			log('info', 'getUserIdFromUsername() response', JSON.stringify(response));
-			log('error', 'getUserIdFromUsername() error', JSON.stringify(error));
 			if (error) return cb(error);
-			const user = response.body.members.filter(m => m.name === username)[0];
+			const members = response.body.members;
+			log('info', 'slack-get-users-response', JSON.stringify(members));
+			const user = members.filter(m => m.name === username)[0];
+			log('info', 'member', JSON.stringify(user));
 			cb(null, user.id);
 		});
 }
