@@ -12,12 +12,16 @@ const { log } = require('./logger');
  * @param  {Function} cb      (error, response)
  */
 exports.sendMessage = function(userId, message, cb) {
+	log('info', 'sendMessage()', JSON.stringify([userId, message]));
 	getChannelIdForUserId(userId, (error, channelId) => {
+		if (error) return cb(error);
+		log('info', 'sendMessage() chennel id', channelId);
 		const body = Object.assign({
 			token : tokens.SLACK_BOT_TOKEN,
 			channel : channelId,
 			as_user : true 
 		}, message);
+		log('info', 'sendMessage() message', body);
 		superagent
 			.post(Endpoints.slackChatApi())
 			.type('form')
@@ -42,6 +46,7 @@ function getChannelIdForUserId(userId, cb) {
 			const channels = response.body;
 			log('info', 'slack-get-channels-response', JSON.stringify(channels));
 			const channel = channels.ims.filter(im => im.user === userId)[0];
+			log('info', 'channel', JSON.stringify(channel));
 			return cb(null, channel.id);
 		})
 }
