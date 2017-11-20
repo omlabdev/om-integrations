@@ -1,6 +1,7 @@
 const superagent = require('superagent');
 const Endpoints = require('../conf/services-endpoints');
 const tokens = require('../conf/tokens');
+const { log } = require('./logger');
 
 /**
  * Sends a message to the given user id (as a private
