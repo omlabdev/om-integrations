@@ -32,7 +32,7 @@ module.exports = {
 	emailAuthToken  : (email) => `Email: ${email}:${tokens.EMAIL_TOKEN}`,
 
 	slackWebhook	: () => 'https://hooks.slack.com/services/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',
-	slackChatApi	: () => `https://slack.com/api/chat.postMessage?token=${tokens.SLACK_APP_TOKEN}`,
+	slackChatApi	: () => `https://slack.com/api/chat.postMessage?token=${tokens.SLACK_BOT_TOKEN}`,
 
 	getTeamworkTask	: (account, apiUser, taskId) => `https://${apiUser}:xxx@${account}.teamwork.com/tasks/${taskId}.json`,
 

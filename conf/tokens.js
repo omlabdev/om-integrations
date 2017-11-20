@@ -19,4 +19,5 @@ module.exports = {
 	TRELLO_TOKEN 	: 'lkjLKNLKKNKABUHIUHS767824',
 
 	EMAIL_TOKEN		: '9078tyausgdhjkn89b38998iuyKHJGYU897'
+
 }

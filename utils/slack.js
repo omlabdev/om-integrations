@@ -17,7 +17,7 @@ exports.sendMessage = function(userId, message, cb) {
 		if (error) return cb(error);
 		log('info', 'sendMessage() chennel id', channelId);
 		const body = Object.assign({
-			token : tokens.SLACK_APP_TOKEN,
+			token : tokens.SLACK_BOT_TOKEN,
 			channel : channelId,
 			as_user : true 
 		}, message);
