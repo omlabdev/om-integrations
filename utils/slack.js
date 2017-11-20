@@ -49,9 +49,12 @@ function getChannelIdForUserId(userId, cb) {
  * @param  {Function} cb       (error, userId)
  */
 exports.getUserIdFromUsername = function(username, cb) {
+	log('info', 'getUserIdFromUsername()', username);
 	superagent
 		.get(Endpoints.getSlackUserIdFromUsername())
 		.end((error, response) => {
+			log('info', 'getUserIdFromUsername() response', JSON.stringify(response));
+			log('error', 'getUserIdFromUsername() error', JSON.stringify(error));
 			if (error) return cb(error);
 			const user = response.body.members.filter(m => m.name === username)[0];
 			cb(null, user.id);
