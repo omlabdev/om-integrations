@@ -13,7 +13,7 @@ const tokens = require('../conf/tokens');
 exports.sendMessage = function(userId, message, cb) {
 	getChannelIdForUserId(userId, (error, channelId) => {
 		const body = Object.assign({
-			token : tokens.SLACK_APP,
+			token : tokens.SLACK_BOT_TOKEN,
 			channel : channelId,
 			as_user : true 
 		}, message);

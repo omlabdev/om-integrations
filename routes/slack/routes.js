@@ -9,6 +9,7 @@ const tokens = require('../../conf/tokens');
 const getIntegrationWithId = require('../../utils/get_integration');
 
 router.get('/', function(res,res) { res.sendStatus(200); });
+// router.get('/auth', auth);
 router.post('/slash/:integrationId', validateToken, resolveSlashCommand);
 router.post('/callback/:integrationId', parsePayload, validateToken, resolveCallback);
 
@@ -16,6 +17,28 @@ module.exports = router;
 
 
 const usersToSlashCommand = {}
+
+
+// function auth(req, res) {
+//     var options = {
+//         uri: 'https://slack.com/api/oauth.access?code='
+//             +req.query.code+
+//             '&client_id='+tokens.SLACK_CLIENT_ID+
+//             '&client_secret='+tokens.SLACK_CLIENT_SECRET+
+//             '&redirect_uri='+process.env.REDIRECT_URI,
+//         method: 'GET'
+//     }
+//     request(options, (error, response, body) => {
+//         var JSONresponse = JSON.parse(body)
+//         if (!JSONresponse.ok){
+//             console.log(JSONresponse)
+//             res.send("Error encountered: \n"+JSON.stringify(JSONresponse)).status(200).end()
+//         }else{
+//             console.log(JSONresponse)
+//             res.send("Success!")
+//         }
+//     })
+// })
 
 /**
  * When an interactive message is sent, the body contains just
