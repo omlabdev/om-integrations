@@ -21,7 +21,7 @@ exports.sendMessage = function(userId, message, cb) {
 			channel : channelId,
 			as_user : true 
 		}, message);
-		log('info', 'sendMessage() message', body);
+		log('info', 'sendMessage() message', JSON.stringify(body));
 		superagent
 			.post(Endpoints.slackChatApi())
 			.type('form')
