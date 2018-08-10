@@ -1,17 +1,8 @@
 const tokens = require('./tokens');
 const moment = require('moment');
 
-let BASE_URL;
-let API_VERSION;
-
-if (process.env.NODE_ENV === 'production') {
-	BASE_URL = 'https://om-services.herokuapp.com';
-	API_VERSION = '1.0';
-} else {
-	BASE_URL = 'http://localhost:3000';
-	API_VERSION = '1.0';
-}
-
+const BASE_URL = OM_SERVICES_URL;
+const API_VERSION = process.env.OM_API_VERSION;
 
 module.exports = {
 	getAuthToken	: () => `${BASE_URL}/api/${API_VERSION}/users/auth-link`,
@@ -25,13 +16,12 @@ module.exports = {
 	getTasks		: (query) => `${BASE_URL}/api/${API_VERSION}/tasks/1?${toQueryString(query)}`,
 	createObjective : () => `${BASE_URL}/api/${API_VERSION}/objectives/add`,
 
-	authToken 		: () => 'Basic: bmljbw==:bmljbw==',
+	authToken 		: () => `Basic: ${tokens.INTEGRATION_USER_TOKEN}`,
 	slackAuthToken  : (username) => `Slack: ${username}:${tokens.SLACK_TOKEN}`,
 	gitAuthToken  	: (username) => `Git: ${username}:${tokens.GIT_TOKEN}`,
 	trelloAuthToken : (username) => `Trello: ${username}:${tokens.TRELLO_TOKEN}`,
 	emailAuthToken  : (email) => `Email: ${email}:${tokens.EMAIL_TOKEN}`,
 
-	slackWebhook	: () => 'https://hooks.slack.com/services/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',
 	slackChatApi	: () => `https://slack.com/api/chat.postMessage?token=${tokens.SLACK_BOT_TOKEN}`,
 
 	getTeamworkTask	: (account, apiUser, taskId) => `https://${apiUser}:xxx@${account}.teamwork.com/tasks/${taskId}.json`,

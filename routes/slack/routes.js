@@ -3,7 +3,6 @@ const router = express.Router();
 const superagent = require('superagent');
 const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
-const TempConfig = require('./../../conf/tmp');
 const getRandomColor = require('./../../utils/random_color');
 const tokens = require('../../conf/tokens');
 const getIntegrationWithId = require('../../utils/get_integration');

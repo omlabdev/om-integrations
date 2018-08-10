@@ -12,6 +12,8 @@ module.exports = {
 
 	/* tokens used to authenticate to OM */
 
+	INTEGRATION_USER_TOKEN : process.env.INTEGRATION_USER_TOKEN,
+
 	SLACK_TOKEN 	: process.env.SLACK_TOKEN,
 
 	GIT_TOKEN 		: process.env.GIT_TOKEN,
