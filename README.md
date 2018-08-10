@@ -4,7 +4,7 @@ This module integrates OM with *Slack*, *Trello*, *Teamwork* and *Email*.
 
 Note: Some integrations use third-party services like [IFTTT](https://ifttt.com) and [Zapier](https://zapier.com).
 
-Note: No database needed for this module.
+Note: No database needed for this module. All data storage is handled by the [Services Module](https://github.com/nicolasalliaume/om-services)
 
 # Installation
 The following installation sequence explains how to set it up on Heroku, but feel free to use any server provider you want.
