@@ -6,6 +6,13 @@ Note: Some integrations use third-party services like [IFTTT](https://ifttt.com)
 
 Note: No database needed for this module. All data storage is handled by the [Services Module](https://github.com/nicolasalliaume/om-services)
 
+# The full stack
+This is one part of a tree-part app.
+   * [Frontend Module](https://github.com/nicolasalliaume/om-frontend)
+   * [Services Module](https://github.com/nicolasalliaume/om-services)
+   
+Note: for this module to work you need to install the [Services Module](https://github.com/nicolasalliaume/om-services).
+
 # Installation
 The following installation sequence explains how to set it up on Heroku, but feel free to use any server provider you want.
 
