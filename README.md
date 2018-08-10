@@ -26,7 +26,7 @@ The following installation sequence explains how to set it up on Heroku, but fee
     
 3. [Add the Heroku git remote to your local repo](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote)
 
-4. [Push the code to Heroku](https://devcenter.heroku.com/articles/git#deploying-code)
+4. [Push the code to Heroku](https://devcenter.heroku.com/articles/git#deploying-code) (Note: if your pushing from the `dev` branch, do `git push heroku dev:master`)
 
 # Support
 If you get stuck while installing this module or have any questions just hmu at nicolas@on-lab.com
