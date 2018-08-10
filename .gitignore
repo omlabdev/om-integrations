@@ -34,3 +34,6 @@ public/attachments/*.*
 
 # Custom build script
 build.sh
+
+# Env config
+.env

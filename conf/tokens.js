@@ -2,9 +2,9 @@ module.exports = {
 
 	/* slack app tokens used with Slack's API */
 
-	SLACK_APP_TOKEN	: 'xoxp-3502577971-3502577973-249466836722-9f23edee1d6a669e3272a574f2b12167',
+	SLACK_APP_TOKEN	: process.env.SLACK_APP_TOKEN, // This is a slack app with a bot
 
-	SLACK_BOT_TOKEN : 'xoxb-274781105765-S68pbBTi0zYSp3NEJ2COu7SX',
+	SLACK_BOT_TOKEN : 'xoxb-274781105765-S68pbBTi0zYSp3NEJ2COu7SX', // This is a bot within the app
 
 	SLACK_CLIENT_ID	: '3502577971.249605696933',
 
@@ -18,6 +18,6 @@ module.exports = {
 
 	TRELLO_TOKEN 	: 'lkjLKNLKKNKABUHIUHS767824',
 
-	EMAIL_TOKEN		: '9078tyausgdhjkn89b38998iuyKHJGYU897'
+	EMAIL_TOKEN		: '9078tyausgdhjkn89b38998iuyKHJGYU897' // just an ugly random string
 
 }
