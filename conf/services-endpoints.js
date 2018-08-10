@@ -1,7 +1,7 @@
 const tokens = require('./tokens');
 const moment = require('moment');
 
-const BASE_URL = OM_SERVICES_URL;
+const BASE_URL = process.env.OM_SERVICES_URL;
 const API_VERSION = process.env.OM_API_VERSION;
 
 module.exports = {
