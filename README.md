@@ -1,21 +1,21 @@
 # OM - Integrations module
-This is the integrations module of OM, a custom-built startup management tool on NodeJS and React. OM helps startups manage the tasks and objectives of the team, as well as billing and alarms. 
+This is the integrations module of OM, a custom-built startup management tool on NodeJS and React. OM helps startups manage the tasks and objectives of the team, as well as billing and alarms.
 This module integrates OM with *Slack*, *Trello*, *Teamwork* and *Email*.
 
 Note: Some integrations use third-party services like [IFTTT](https://ifttt.com) and [Zapier](https://zapier.com).
 
-Note: No database needed for this module. All data storage is handled by the [Services Module](https://github.com/nicolasalliaume/om-services)
+Note: No database needed for this module. All data storage is handled by the [Services Module](https://github.com/omlabdev/om-services)
 
 # The full stack
 This is one part of a tree-part app.
-   * [Frontend Module](https://github.com/nicolasalliaume/om-frontend)
-   * [Services Module](https://github.com/nicolasalliaume/om-services)
-   
-Note: for this module to work you need to install the [Services Module](https://github.com/nicolasalliaume/om-services).
+   * [Frontend Module](https://github.com/omlabdev/om-frontend)
+   * [Services Module](https://github.com/omlabdev/om-services)
+
+Note: for this module to work you need to install the [Services Module](https://github.com/omlabdev/om-services).
 
 # Inspiration and history
 
-At [ON Lab](http://on-lab.com) we were struggling to get more peace-of-mind about our billing and our tasks. Some of our founders use the [bullet journal](http://bulletjournal.com) method on notebooks, and we thought we could scale that and adopt it company-wide. That's how the first version of OM was born: just as a tool to keep track of the tasks at hand in a bullet journal kinda style.
+At [Om Lab](https://omlab.dev) we were struggling to get more peace-of-mind about our billing and our tasks. Some of our founders use the [bullet journal](http://bulletjournal.com) method on notebooks, and we thought we could scale that and adopt it company-wide. That's how the first version of OM was born: just as a tool to keep track of the tasks at hand in a bullet journal kinda style.
 
 At the same time, we were using a small app we wrote to track the hours worked for our different projects. So we decided to move the hour-tracking system into OM, and have it all in one place.
 
@@ -48,10 +48,10 @@ The following installation sequence explains how to set it up on Heroku, but fee
     * `GIT_TOKEN`: A made-up token to use when authenticating a Git user between the integrations module and the services module. (Just make up an ugly string).
     * `TRELLO_TOKEN`: A made-up token to use when authenticating a Trello user between the integrations module and the services module. (Just make up an ugly string).
     * `EMAIL_TOKEN`: A made-up token to use when authenticating an Email account user between the integrations module and the services module. (Just make up an ugly string).
-    
+
 3. [Add the Heroku git remote to your local repo](https://devcenter.heroku.com/articles/git#creating-a-heroku-remote)
 
 4. [Push the code to Heroku](https://devcenter.heroku.com/articles/git#deploying-code) (Note: if your pushing from the `dev` branch, do `git push heroku dev:master`)
 
 # Support
-If you get stuck while installing this module or have any questions just hmu at nicolas@on-lab.com
+If you get stuck while installing this module or have any questions just contact us at hello@omlab.dev
