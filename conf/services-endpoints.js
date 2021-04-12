@@ -16,6 +16,8 @@ module.exports = {
 	getTasks		: (query) => `${BASE_URL}/api/${API_VERSION}/tasks/1?${toQueryString(query)}`,
 	createObjective : () => `${BASE_URL}/api/${API_VERSION}/objectives/add`,
 
+	clockifyAddEntry : () => `${BASE_URL}/api/${API_VERSION}/clockify/work-entries/add`,
+
 	authToken 		: () => `Basic: ${tokens.INTEGRATION_USER_TOKEN}`,
 	slackAuthToken  : (username) => `Slack: ${username}:${tokens.SLACK_TOKEN}`,
 	gitAuthToken  	: (username) => `Git: ${username}:${tokens.GIT_TOKEN}`,
