@@ -20,6 +20,7 @@ function processNewEntry(req, res) {
     const entryData = {
       project: project.name,
       user: user.name,
+      title: data.description,
       time: time,
     };
   	superagent
