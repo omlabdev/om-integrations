@@ -17,6 +17,7 @@ module.exports = {
 	createObjective : () => `${BASE_URL}/api/${API_VERSION}/objectives/add`,
 
 	clockifyAddEntry : () => `${BASE_URL}/api/${API_VERSION}/clockify/work-entries/add`,
+	clockifyAPI : (path) => `https://api.clockify.me/api/v1/${path}`,
 
 	authToken 		: () => `Basic: ${tokens.INTEGRATION_USER_TOKEN}`,
 	slackAuthToken  : (username) => `Slack: ${username}:${tokens.SLACK_TOKEN}`,

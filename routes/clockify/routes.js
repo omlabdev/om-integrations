@@ -12,23 +12,40 @@ module.exports = router;
 function processNewEntry(req, res) {
   const data = req.body;
   const project = data.project;
+  // Check if a project was defined
   if (project) {
-    const user = data.user;
+    const workspaceId = data.workspaceId;
     const start = new Date(data.timeInterval.start);
     const end = new Date(data.timeInterval.end);
     const time = (end - start) / 1000;
-    const entryData = {
-      project: project.name,
-      user: user.name,
-      title: data.description,
-      time: time,
-    };
-  	superagent
-  		.post(Endpoints.clockifyAddEntry())
-  		.set('Authorization', Endpoints.authToken())
-  		.send(entryData)
-  		.then(response => console.log(response.body))
-  		.catch(error => log('error', 'clockify-new-entry', error.message));
+    let user = data.user;
+
+    // Get the user so we can get their email
+    superagent.get(Endpoints.clockifyAPI(`workspaces/${workspaceId}/users`))
+    .set('X-Api-Key', process.env.CLOCKIFY_KEY)
+    .query({ name: user.name })
+    .then((response) => {
+      for (var userData of response.body) {
+        if (userData.id === user.id) {
+          user = userData;
+          break;
+        }
+      }
+      const email = response.body[0].email;
+      const entryData = {
+        project: project.name,
+        user: user.email,
+        title: data.description,
+        time: time,
+      };
+      superagent
+      .post(Endpoints.clockifyAddEntry())
+      .set('Authorization', Endpoints.authToken())
+      .send(entryData)
+      .then(response => console.log(response.body))
+      .catch(error => log('error', 'clockify-new-entry', error.message));
+    })
+    .catch(error => log('error', 'clockify-new-entry', error.message));
   }
 
   res.sendStatus(200);
