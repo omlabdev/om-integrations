@@ -10,8 +10,6 @@ router.post('/webhook/newentry', processNewEntry);
 module.exports = router;
 
 function processNewEntry(req, res) {
-  console.log(req.body);
-
   const data = req.body;
   const project = data.project;
   if (project) {
