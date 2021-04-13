@@ -18,8 +18,8 @@ function processNewEntry(req, res) {
     const end = new Date(data.timeInterval.end);
     const time = (end - start) / 1000;
     const entryData = {
-      project: project.name.toLowerCase(),
-      user: user.name.toLowerCase(),
+      project: project.name,
+      user: user.name,
       time: time,
     };
   	superagent
