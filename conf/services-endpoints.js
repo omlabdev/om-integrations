@@ -16,7 +16,7 @@ module.exports = {
 	getTasks		: (query) => `${BASE_URL}/api/${API_VERSION}/tasks/1?${toQueryString(query)}`,
 	createObjective : () => `${BASE_URL}/api/${API_VERSION}/objectives/add`,
 
-	clockifyAddEntry : () => `${BASE_URL}/api/${API_VERSION}/clockify/work-entries/add`,
+	clockify : () => `${BASE_URL}/api/${API_VERSION}/clockify/work-entries`,
 	clockifyAPI : (path) => `https://api.clockify.me/api/v1/${path}`,
 
 	authToken 		: () => `Basic: ${tokens.INTEGRATION_USER_TOKEN}`,
