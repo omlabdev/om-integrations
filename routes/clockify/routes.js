@@ -11,19 +11,23 @@ router.post('/webhook/delete', processDeleteEntry);
 
 module.exports = router;
 
-function getTime(data) {
-  const start = new Date(data.timeInterval.start);
-  const end = new Date(data.timeInterval.end);
+function getTime(timeInterval) {
+  const start = new Date(timeInterval.start);
+  const end = new Date(timeInterval.end);
   return (end - start) / 1000;
 }
 
 function processUpdateEntry(req, res) {
   const data = req.body;
-  const time = getTime(data);
   superagent
   .put(Endpoints.clockify())
   .set('Authorization', Endpoints.authToken())
-  .send({ id: data.id, time: time })
+  .send({
+    id: data.id,
+    title: data.description,
+    project: data.project.name,
+    time: getTime(data.timeInterval),
+  })
   .then(response => {
     console.log('clockify-update-entry', response.body);
     res.sendStatus(200);
@@ -56,7 +60,7 @@ function processCreateEntry(req, res) {
   // Check if a project was defined
   if (project) {
     const workspaceId = data.workspaceId;
-    const time = getTime(data);
+    const time = getTime(data.timeInterval);
     let user = data.user;
 
     // Get the user so we can get their email
