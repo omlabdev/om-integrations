@@ -5,9 +5,9 @@ const { log } = require('./../../utils/logger');
 const Endpoints = require('./../../conf/services-endpoints');
 
 router.get('/', (req, res) => { res.sendStatus(200); });
-router.post('/webhook', processCreateEntry);
-router.put('/webhook', processUpdateEntry);
-router.delete('/webhook', processDeleteEntry);
+router.post('/webhook/create', processCreateEntry);
+router.post('/webhook/update', processUpdateEntry);
+router.post('/webhook/delete', processDeleteEntry);
 
 module.exports = router;
 
